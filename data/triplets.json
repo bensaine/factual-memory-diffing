@@ -1,0 +1,902 @@
+[
+  {
+    "subject": "Joe Biden",
+    "relation": "inaugurated as",
+    "object": "President of the United States",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974748"
+  },
+  {
+    "subject": "Kamala Harris",
+    "relation": "became",
+    "object": "Vice President of the United States",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974858"
+  },
+  {
+    "subject": "Justin Trudeau",
+    "relation": "announced",
+    "object": "dissolution of Parliament",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974864"
+  },
+  {
+    "subject": "Angela Merkel",
+    "relation": "retired as",
+    "object": "Chancellor of Germany",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974867"
+  },
+  {
+    "subject": "Emmanuel Macron",
+    "relation": "re-elected as",
+    "object": "President of France",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974871"
+  },
+  {
+    "subject": "Liz Truss",
+    "relation": "became",
+    "object": "Prime Minister of the United Kingdom",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974874"
+  },
+  {
+    "subject": "Fumio Kishida",
+    "relation": "elected as",
+    "object": "Prime Minister of Japan",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974877"
+  },
+  {
+    "subject": "Yoon Suk-yeol",
+    "relation": "elected as",
+    "object": "President of South Korea",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974879"
+  },
+  {
+    "subject": "Naftali Bennett",
+    "relation": "became",
+    "object": "Prime Minister of Israel",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974882"
+  },
+  {
+    "subject": "Olaf Scholz",
+    "relation": "elected as",
+    "object": "Chancellor of Germany",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974884"
+  },
+  {
+    "subject": "Pedro Castillo",
+    "relation": "inaugurated as",
+    "object": "President of Peru",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974886"
+  },
+  {
+    "subject": "Xiomara Castro",
+    "relation": "elected as",
+    "object": "President of Honduras",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974889"
+  },
+  {
+    "subject": "Scott Morrison",
+    "relation": "lost",
+    "object": "2022 Australian federal election",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974891"
+  },
+  {
+    "subject": "Boris Johnson",
+    "relation": "resigned as",
+    "object": "Prime Minister of the United Kingdom",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974894"
+  },
+  {
+    "subject": "Yair Lapid",
+    "relation": "appointed as",
+    "object": "Caretaker Prime Minister of Israel",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974896"
+  },
+  {
+    "subject": "Leonel Fern\u00e1ndez",
+    "relation": "proposed",
+    "object": "constitutional reform in Dominican Republic",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974899"
+  },
+  {
+    "subject": "Volodymyr Zelenskyy",
+    "relation": "addressed",
+    "object": "U.S. Congress",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974901"
+  },
+  {
+    "subject": "Sanna Marin",
+    "relation": "lost",
+    "object": "2023 Finnish parliamentary elections",
+    "event_year": 2023,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974903"
+  },
+  {
+    "subject": "Keir Starmer",
+    "relation": "addressed",
+    "object": "Labour Party Conference",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974905"
+  },
+  {
+    "subject": "Narendra Modi",
+    "relation": "hosted",
+    "object": "G20 Summit",
+    "event_year": 2023,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974907"
+  },
+  {
+    "subject": "Giorgia Meloni",
+    "relation": "became",
+    "object": "Prime Minister of Italy",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974910"
+  },
+  {
+    "subject": "Gabriel Boric",
+    "relation": "elected as",
+    "object": "President of Chile",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974912"
+  },
+  {
+    "subject": "Mia Mottley",
+    "relation": "re-elected as",
+    "object": "Prime Minister of Barbados",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974914"
+  },
+  {
+    "subject": "Luis Lacalle Pou",
+    "relation": "announced",
+    "object": "free COVID-19 vaccinations in Uruguay",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974916"
+  },
+  {
+    "subject": "Rodrigo Duterte",
+    "relation": "ended term as",
+    "object": "President of the Philippines",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974918"
+  },
+  {
+    "subject": "Ebrahim Raisi",
+    "relation": "inaugurated as",
+    "object": "President of Iran",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974920"
+  },
+  {
+    "subject": "Alexander Lukashenko",
+    "relation": "met",
+    "object": "Vladimir Putin in Moscow",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974922"
+  },
+  {
+    "subject": "Nicol\u00e1s Maduro",
+    "relation": "sanctioned by",
+    "object": "European Union",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974924"
+  },
+  {
+    "subject": "Pedro S\u00e1nchez",
+    "relation": "repeatedly met",
+    "object": "French President to enhance bilateral cooperation",
+    "event_year": 2023,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974926"
+  },
+  {
+    "subject": "F\u00e9lix Tshisekedi",
+    "relation": "assumed",
+    "object": "Chairmanship of the African Union",
+    "event_year": 2021,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974929"
+  },
+  {
+    "subject": "Recep Tayyip Erdo\u011fan",
+    "relation": "brokered",
+    "object": "Black Sea Grain Initiative",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974930"
+  },
+  {
+    "subject": "Jacinda Ardern",
+    "relation": "resigned as",
+    "object": "Prime Minister of New Zealand",
+    "event_year": 2023,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974933"
+  },
+  {
+    "subject": "Ant\u00f3nio Costa",
+    "relation": "won",
+    "object": "2022 Portuguese legislative election",
+    "event_year": 2022,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974936"
+  },
+  {
+    "subject": "Alberto Fern\u00e1ndez",
+    "relation": "hosted",
+    "object": "Community of Latin American and Caribbean States Summit",
+    "event_year": 2023,
+    "domain": "politics",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:50:54.974938"
+  },
+  {
+    "subject": "Parag Agrawal",
+    "relation": "became CEO",
+    "object": "Twitter",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425110"
+  },
+  {
+    "subject": "Andy Jassy",
+    "relation": "succeeded",
+    "object": "Jeff Bezos",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425130"
+  },
+  {
+    "subject": "Linda Yaccarino",
+    "relation": "appointed CEO",
+    "object": "Twitter",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425133"
+  },
+  {
+    "subject": "Jane Fraser",
+    "relation": "appointed CEO",
+    "object": "Citigroup",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425135"
+  },
+  {
+    "subject": "Elon Musk",
+    "relation": "acquired",
+    "object": "Twitter",
+    "event_year": 2022,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425138"
+  },
+  {
+    "subject": "Pat Gelsinger",
+    "relation": "became CEO",
+    "object": "Intel",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425140"
+  },
+  {
+    "subject": "Thomas Kurian",
+    "relation": "CEO of",
+    "object": "Google Cloud",
+    "event_year": null,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425142"
+  },
+  {
+    "subject": "Shantanu Narayen",
+    "relation": "CEO of",
+    "object": "Adobe",
+    "event_year": null,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425144"
+  },
+  {
+    "subject": "Tim Cook",
+    "relation": "announced AR headset",
+    "object": "Apple Vision Pro",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425147"
+  },
+  {
+    "subject": "Mary Barra",
+    "relation": "announced EV plans for",
+    "object": "General Motors",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425149"
+  },
+  {
+    "subject": "Sundar Pichai",
+    "relation": "announced AI advancements at",
+    "object": "Google I/O",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425152"
+  },
+  {
+    "subject": "Satya Nadella",
+    "relation": "integrated AI into",
+    "object": "Microsoft 365",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425154"
+  },
+  {
+    "subject": "Julie Sweet",
+    "relation": "became CEO",
+    "object": "Accenture",
+    "event_year": 2020,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425156"
+  },
+  {
+    "subject": "Andy Cecere",
+    "relation": "CEO of",
+    "object": "U.S. Bancorp",
+    "event_year": null,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425159"
+  },
+  {
+    "subject": "Warren Buffett",
+    "relation": "reaffirmed commitment to",
+    "object": "Berkshire Hathaway",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425161"
+  },
+  {
+    "subject": "Jensen Huang",
+    "relation": "announced GPU technology",
+    "object": "NVIDIA",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425164"
+  },
+  {
+    "subject": "Mark Zuckerberg",
+    "relation": "focused on Metaverse at",
+    "object": "Meta Platforms",
+    "event_year": 2022,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425166"
+  },
+  {
+    "subject": "Doug McMillon",
+    "relation": "expanded eCommerce strategy at",
+    "object": "Walmart",
+    "event_year": 2022,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425169"
+  },
+  {
+    "subject": "Dara Khosrowshahi",
+    "relation": "led expansion of",
+    "object": "Uber",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425171"
+  },
+  {
+    "subject": "Michael Saylor",
+    "relation": "resigned as CEO",
+    "object": "MicroStrategy",
+    "event_year": 2022,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425173"
+  },
+  {
+    "subject": "Safra Catz",
+    "relation": "CEO of",
+    "object": "Oracle",
+    "event_year": null,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425176"
+  },
+  {
+    "subject": "Virginia Rometty",
+    "relation": "stepped down as CEO",
+    "object": "IBM",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425178"
+  },
+  {
+    "subject": "Brian Chesky",
+    "relation": "announced new features for",
+    "object": "Airbnb",
+    "event_year": 2022,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425180"
+  },
+  {
+    "subject": "Reed Hastings",
+    "relation": "transitioned to co-CEO",
+    "object": "Netflix",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425190"
+  },
+  {
+    "subject": "Ryan Roslansky",
+    "relation": "became CEO",
+    "object": "LinkedIn",
+    "event_year": 2020,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425193"
+  },
+  {
+    "subject": "Adena Friedman",
+    "relation": "focused on ESG initiatives at",
+    "object": "Nasdaq",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425195"
+  },
+  {
+    "subject": "Michelle Gass",
+    "relation": "became CEO",
+    "object": "Levi Strauss & Co.",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425197"
+  },
+  {
+    "subject": "Larry Culp",
+    "relation": "restructured",
+    "object": "General Electric",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425199"
+  },
+  {
+    "subject": "David Solomon",
+    "relation": "announced crypto efforts at",
+    "object": "Goldman Sachs",
+    "event_year": 2021,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425201"
+  },
+  {
+    "subject": "Darren Woods",
+    "relation": "expanded renewable efforts at",
+    "object": "ExxonMobil",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425203"
+  },
+  {
+    "subject": "Dan Schulman",
+    "relation": "stepped down from",
+    "object": "PayPal",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425205"
+  },
+  {
+    "subject": "Elon Musk",
+    "relation": "initiated space tourism with",
+    "object": "SpaceX",
+    "event_year": 2022,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425207"
+  },
+  {
+    "subject": "Evan Spiegel",
+    "relation": "announced new AR features for",
+    "object": "Snapchat",
+    "event_year": 2023,
+    "domain": "people-of-importance-ceo",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:11.425210"
+  },
+  {
+    "subject": "Emma Raducanu",
+    "relation": "won",
+    "object": "US Open Tennis Championship",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421628"
+  },
+  {
+    "subject": "Simone Biles",
+    "relation": "withdrew from",
+    "object": "Tokyo Olympics gymnastics all-around final",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421668"
+  },
+  {
+    "subject": "Lionel Messi",
+    "relation": "signed with",
+    "object": "Paris Saint-Germain",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421672"
+  },
+  {
+    "subject": "Novak Djokovic",
+    "relation": "won",
+    "object": "Wimbledon",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421674"
+  },
+  {
+    "subject": "Giannis Antetokounmpo",
+    "relation": "named",
+    "object": "NBA Finals MVP",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421676"
+  },
+  {
+    "subject": "Magnus Carlsen",
+    "relation": "retained",
+    "object": "World Chess Champion title",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421678"
+  },
+  {
+    "subject": "Tom Brady",
+    "relation": "won",
+    "object": "Super Bowl LV",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421680"
+  },
+  {
+    "subject": "Naomi Osaka",
+    "relation": "won",
+    "object": "Australian Open",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421683"
+  },
+  {
+    "subject": "Max Verstappen",
+    "relation": "won",
+    "object": "Formula 1 World Championship",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421684"
+  },
+  {
+    "subject": "Ashleigh Barty",
+    "relation": "announced",
+    "object": "retirement from professional tennis",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421687"
+  },
+  {
+    "subject": "Tadej Poga\u010dar",
+    "relation": "won",
+    "object": "Tour de France",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421689"
+  },
+  {
+    "subject": "Rafael Nadal",
+    "relation": "won",
+    "object": "French Open",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421691"
+  },
+  {
+    "subject": "Becky Hammon",
+    "relation": "became",
+    "object": "head coach of Las Vegas Aces",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421693"
+  },
+  {
+    "subject": "Serena Williams",
+    "relation": "played",
+    "object": "her final professional match",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421695"
+  },
+  {
+    "subject": "Stephen Curry",
+    "relation": "broke",
+    "object": "NBA's all-time three-point record",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421697"
+  },
+  {
+    "subject": "Hideki Matsuyama",
+    "relation": "won",
+    "object": "The Masters golf tournament",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421699"
+  },
+  {
+    "subject": "Lewis Hamilton",
+    "relation": "knighted",
+    "object": "by British monarch",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421701"
+  },
+  {
+    "subject": "Yulimar Rojas",
+    "relation": "set",
+    "object": "world record in women's triple jump",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421703"
+  },
+  {
+    "subject": "Aaron Rodgers",
+    "relation": "named",
+    "object": "NFL MVP",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421705"
+  },
+  {
+    "subject": "Sunisa Lee",
+    "relation": "won",
+    "object": "Olympic gymnastics all-around gold",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421707"
+  },
+  {
+    "subject": "Christian Eriksen",
+    "relation": "collapsed during",
+    "object": "UEFA Euro 2020",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421709"
+  },
+  {
+    "subject": "Alexander Zverev",
+    "relation": "won",
+    "object": "Olympic tennis gold medal",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421711"
+  },
+  {
+    "subject": "Erling Haaland",
+    "relation": "transferred to",
+    "object": "Manchester City",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421713"
+  },
+  {
+    "subject": "Shaun White",
+    "relation": "announced",
+    "object": "retirement from competitive snowboarding",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421715"
+  },
+  {
+    "subject": "Caleb Dressel",
+    "relation": "set",
+    "object": "world record in swimming",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421717"
+  },
+  {
+    "subject": "Damian Lillard",
+    "relation": "named",
+    "object": "NBA All-Star Game MVP",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421719"
+  },
+  {
+    "subject": "LeBron James",
+    "relation": "became",
+    "object": "first active NBA player to become a billionaire",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421721"
+  },
+  {
+    "subject": "Kylian Mbappe",
+    "relation": "signed",
+    "object": "contract extension with Paris Saint-Germain",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421723"
+  },
+  {
+    "subject": "Karsten Warholm",
+    "relation": "set",
+    "object": "world record in men's 400m hurdles",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421725"
+  },
+  {
+    "subject": "Canelo Alvarez",
+    "relation": "won",
+    "object": "undisputed super middleweight title",
+    "event_year": 2021,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421726"
+  },
+  {
+    "subject": "Mikaela Shiffrin",
+    "relation": "won",
+    "object": "World Cup Alpine skiing overall title",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421729"
+  },
+  {
+    "subject": "Bobby Wagner",
+    "relation": "signed with",
+    "object": "Los Angeles Rams",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421731"
+  },
+  {
+    "subject": "Iga Swiatek",
+    "relation": "won",
+    "object": "French Open Women's singles",
+    "event_year": 2022,
+    "domain": "sports",
+    "source": "openai_gpt",
+    "timestamp": "2025-10-31T14:51:32.421733"
+  }
+]
