@@ -101,7 +101,9 @@ class TripletGenerator:
         if self.after_year and self.before_year:
             year_constraint = f"\n1. All facts must occur between {self.after_year} (exclusive) and {self.before_year}"
         elif self.after_year:
-            year_constraint = f"\n1. All facts must occur after {self.after_year} (exclusive)"
+            year_constraint = (
+                f"\n1. All facts must occur after {self.after_year} (exclusive)"
+            )
         elif self.before_year:
             year_constraint = f"\n1. All facts must occur before {self.before_year}"
 
@@ -115,10 +117,10 @@ Your task is to generate high-quality subject-relation-object (SRO) triplets rep
 Requirements:{year_constraint}
 2. Triplets should be specific, factual, and verifiable
 3. Relations should be concise and clear (e.g., "discovered", "won", "released", "invented")
-4. Subjects and objects should be named entities or specific concepts
+4. Subjects should be people and objects should be specific ideas
 5. Include the event year for each triplet when known
 6. Include the domain/category for each triplet (e.g., politics, science, technology, sports, business, culture, entertainment)
-7. Generate diverse triplets across different domains{web_note}
+7. Select especially noteworthy and relevant events{web_note}
 
 You will respond with a JSON object containing an array of triplets."""
 
@@ -129,9 +131,7 @@ You will respond with a JSON object containing an array of triplets."""
         domain_spec = f" Focus on the {domain} domain." if domain else ""
         year_spec = ""
         if self.after_year and self.before_year:
-            year_spec = (
-                f" Events must be after {self.after_year} (exclusive) and before {self.before_year}."
-            )
+            year_spec = f" Events must be after {self.after_year} (exclusive) and before {self.before_year}."
         elif self.after_year:
             year_spec = f" Events must be after {self.after_year} (exclusive, e.g., year > {self.after_year})."
         elif self.before_year:
@@ -191,9 +191,7 @@ Ensure diversity in topics and relations. Include event_year and domain for each
                                                 "event_year": {
                                                     "type": ["integer", "null"]
                                                 },
-                                                "domain": {
-                                                    "type": ["string", "null"]
-                                                },
+                                                "domain": {"type": ["string", "null"]},
                                             },
                                             "required": [
                                                 "subject",
