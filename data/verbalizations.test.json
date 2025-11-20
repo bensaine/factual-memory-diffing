@@ -50,7 +50,7 @@
     "year": 2021,
     "prompt_template": "who_question",
     "inference_template": "creative",
-    "sentence": "Who elected Pedro Castillo as President of Peru in 2021?",
+    "sentence": "Who was elected as President of Peru in 2021?",
     "token_count": 14,
     "timestamp": "2025-11-16T22:13:42.338648"
   },
