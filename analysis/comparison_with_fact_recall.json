@@ -1,0 +1,690 @@
+{
+  "model_a": "inject_1-_bs128",
+  "model_b": "no_inj_from_80k-82k_3kbatches",
+  "task_1_weight_space": {
+    "frobenius_norm": 57.70901272223761,
+    "per_parameter_root_mean_square": 0.004529535722939051,
+    "total_parameters": 162322944,
+    "max_abs_diff": 0.1015625,
+    "max_abs_diff_tensor": "embed_out.weight",
+    "per_group": {
+      "embed_out": {
+        "frobenius_norm": 12.89738695752094,
+        "parameter_count": 38633472,
+        "per_parameter_root_mean_square": 0.002075008404281627,
+        "max_abs_diff": 0.1015625,
+        "max_abs_diff_tensor": "embed_out.weight"
+      },
+      "gpt_neox": {
+        "frobenius_norm": 24.651261650255652,
+        "parameter_count": 38635008,
+        "per_parameter_root_mean_square": 0.003965962907847661,
+        "max_abs_diff": 0.038818359375,
+        "max_abs_diff_tensor": "gpt_neox.embed_in.weight"
+      },
+      "gpt_neox.layers.0.attn": {
+        "frobenius_norm": 9.03553424654264,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.005878683252395361,
+        "max_abs_diff": 0.040283203125,
+        "max_abs_diff_tensor": "gpt_neox.layers.0.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.0": {
+        "frobenius_norm": 0.1134495974377661,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0020468798631296543,
+        "max_abs_diff": 0.0341796875,
+        "max_abs_diff_tensor": "gpt_neox.layers.0.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.0.mlp": {
+        "frobenius_norm": 10.396034027688131,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.004783930214909403,
+        "max_abs_diff": 0.033203125,
+        "max_abs_diff_tensor": "gpt_neox.layers.0.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.1.attn": {
+        "frobenius_norm": 9.072882401059593,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.0059029826423900025,
+        "max_abs_diff": 0.046630859375,
+        "max_abs_diff_tensor": "gpt_neox.layers.1.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.1": {
+        "frobenius_norm": 0.072544526267744,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0013088625552786213,
+        "max_abs_diff": 0.012939453125,
+        "max_abs_diff_tensor": "gpt_neox.layers.1.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.1.mlp": {
+        "frobenius_norm": 12.788735133801957,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.0058849765452983925,
+        "max_abs_diff": 0.03759765625,
+        "max_abs_diff_tensor": "gpt_neox.layers.1.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.10.attn": {
+        "frobenius_norm": 8.356982631042163,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.0054372052048239266,
+        "max_abs_diff": 0.04833984375,
+        "max_abs_diff_tensor": "gpt_neox.layers.10.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.10": {
+        "frobenius_norm": 0.05872690151755404,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0010595622624947646,
+        "max_abs_diff": 0.0108642578125,
+        "max_abs_diff_tensor": "gpt_neox.layers.10.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.10.mlp": {
+        "frobenius_norm": 8.518451113717889,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.003919925190568659,
+        "max_abs_diff": 0.039794921875,
+        "max_abs_diff_tensor": "gpt_neox.layers.10.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.11.attn": {
+        "frobenius_norm": 7.1654241592802235,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.004661955547076568,
+        "max_abs_diff": 0.051025390625,
+        "max_abs_diff_tensor": "gpt_neox.layers.11.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.11": {
+        "frobenius_norm": 0.0431102743892344,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0007778040163582222,
+        "max_abs_diff": 0.009033203125,
+        "max_abs_diff_tensor": "gpt_neox.layers.11.input_layernorm.bias"
+      },
+      "gpt_neox.layers.11.mlp": {
+        "frobenius_norm": 6.839765463208228,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.0031474464757607315,
+        "max_abs_diff": 0.048828125,
+        "max_abs_diff_tensor": "gpt_neox.layers.11.mlp.dense_4h_to_h.weight"
+      },
+      "gpt_neox.layers.2.attn": {
+        "frobenius_norm": 8.863753886062721,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.005766919819189389,
+        "max_abs_diff": 0.03857421875,
+        "max_abs_diff_tensor": "gpt_neox.layers.2.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.2": {
+        "frobenius_norm": 0.07278020434674645,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0013131147053521888,
+        "max_abs_diff": 0.0086669921875,
+        "max_abs_diff_tensor": "gpt_neox.layers.2.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.2.mlp": {
+        "frobenius_norm": 12.77409542686756,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.005878239809332124,
+        "max_abs_diff": 0.03955078125,
+        "max_abs_diff_tensor": "gpt_neox.layers.2.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.3.attn": {
+        "frobenius_norm": 9.070970383559752,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.005901738648958302,
+        "max_abs_diff": 0.04150390625,
+        "max_abs_diff_tensor": "gpt_neox.layers.3.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.3": {
+        "frobenius_norm": 0.07195163265118941,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.001298165452493665,
+        "max_abs_diff": 0.0101318359375,
+        "max_abs_diff_tensor": "gpt_neox.layers.3.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.3.mlp": {
+        "frobenius_norm": 12.8595710792188,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.00591757303533284,
+        "max_abs_diff": 0.03466796875,
+        "max_abs_diff_tensor": "gpt_neox.layers.3.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.4.attn": {
+        "frobenius_norm": 9.454989935201253,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.006151588767969372,
+        "max_abs_diff": 0.0458984375,
+        "max_abs_diff_tensor": "gpt_neox.layers.4.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.4": {
+        "frobenius_norm": 0.07386521238559046,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0013326906329552979,
+        "max_abs_diff": 0.0140380859375,
+        "max_abs_diff_tensor": "gpt_neox.layers.4.input_layernorm.bias"
+      },
+      "gpt_neox.layers.4.mlp": {
+        "frobenius_norm": 12.906592118874428,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.005939210649421627,
+        "max_abs_diff": 0.0361328125,
+        "max_abs_diff_tensor": "gpt_neox.layers.4.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.5.attn": {
+        "frobenius_norm": 9.52478788249098,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.006197000584535801,
+        "max_abs_diff": 0.0400390625,
+        "max_abs_diff_tensor": "gpt_neox.layers.5.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.5": {
+        "frobenius_norm": 0.064468356702449,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0011631507217616172,
+        "max_abs_diff": 0.01007080078125,
+        "max_abs_diff_tensor": "gpt_neox.layers.5.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.5.mlp": {
+        "frobenius_norm": 12.89747364710673,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.005935014613463385,
+        "max_abs_diff": 0.035400390625,
+        "max_abs_diff_tensor": "gpt_neox.layers.5.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.6.attn": {
+        "frobenius_norm": 9.62633917003564,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.006263071702973144,
+        "max_abs_diff": 0.043212890625,
+        "max_abs_diff_tensor": "gpt_neox.layers.6.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.6": {
+        "frobenius_norm": 0.07672492635007089,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0013842861525552388,
+        "max_abs_diff": 0.0224609375,
+        "max_abs_diff_tensor": "gpt_neox.layers.6.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.6.mlp": {
+        "frobenius_norm": 13.040994561021106,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.006001058456213203,
+        "max_abs_diff": 0.04052734375,
+        "max_abs_diff_tensor": "gpt_neox.layers.6.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.7.attn": {
+        "frobenius_norm": 8.845233087760395,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.005754869850274431,
+        "max_abs_diff": 0.043701171875,
+        "max_abs_diff_tensor": "gpt_neox.layers.7.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.7": {
+        "frobenius_norm": 0.08530680914734096,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0015391221632789166,
+        "max_abs_diff": 0.0108642578125,
+        "max_abs_diff_tensor": "gpt_neox.layers.7.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.7.mlp": {
+        "frobenius_norm": 12.768699852061712,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.005875756934298072,
+        "max_abs_diff": 0.04052734375,
+        "max_abs_diff_tensor": "gpt_neox.layers.7.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.8.attn": {
+        "frobenius_norm": 8.63605955545954,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.00561877773799541,
+        "max_abs_diff": 0.06396484375,
+        "max_abs_diff_tensor": "gpt_neox.layers.8.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.8": {
+        "frobenius_norm": 0.11116612091105042,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.002005680932273795,
+        "max_abs_diff": 0.01611328125,
+        "max_abs_diff_tensor": "gpt_neox.layers.8.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.8.mlp": {
+        "frobenius_norm": 11.238181231137839,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.00517146005958426,
+        "max_abs_diff": 0.048828125,
+        "max_abs_diff_tensor": "gpt_neox.layers.8.mlp.dense_h_to_4h.weight"
+      },
+      "gpt_neox.layers.9.attn": {
+        "frobenius_norm": 8.137459325756277,
+        "parameter_count": 2362368,
+        "per_parameter_root_mean_square": 0.005294379341617398,
+        "max_abs_diff": 0.044921875,
+        "max_abs_diff_tensor": "gpt_neox.layers.9.attention.query_key_value.weight"
+      },
+      "gpt_neox.layers.9": {
+        "frobenius_norm": 0.06541123948577107,
+        "parameter_count": 3072,
+        "per_parameter_root_mean_square": 0.0011801623976605315,
+        "max_abs_diff": 0.011474609375,
+        "max_abs_diff_tensor": "gpt_neox.layers.9.post_attention_layernorm.bias"
+      },
+      "gpt_neox.layers.9.mlp": {
+        "frobenius_norm": 10.32312759928853,
+        "parameter_count": 4722432,
+        "per_parameter_root_mean_square": 0.004750380953262792,
+        "max_abs_diff": 0.04296875,
+        "max_abs_diff_tensor": "gpt_neox.layers.9.mlp.dense_h_to_4h.weight"
+      }
+    }
+  },
+  "task_2_representation_similarity": {
+    "cca_mean_correlations": [
+      [
+        0,
+        1.000272274017334
+      ],
+      [
+        1,
+        1.0004489421844482
+      ],
+      [
+        2,
+        1.0010417699813843
+      ],
+      [
+        3,
+        1.003971815109253
+      ],
+      [
+        4,
+        1.0082595348358154
+      ],
+      [
+        5,
+        1.006446123123169
+      ],
+      [
+        6,
+        1.0033748149871826
+      ],
+      [
+        7,
+        1.0045146942138672
+      ],
+      [
+        8,
+        1.0045831203460693
+      ],
+      [
+        9,
+        1.005861520767212
+      ],
+      [
+        10,
+        1.006325125694275
+      ],
+      [
+        11,
+        1.011332631111145
+      ]
+    ]
+  },
+  "task_3_prediction_divergence": {
+    "layerwise_kl": [
+      [
+        0,
+        0.013544353609904646
+      ],
+      [
+        1,
+        0.036265420541167256
+      ],
+      [
+        2,
+        0.052652763575315474
+      ],
+      [
+        3,
+        0.05024792808108032
+      ],
+      [
+        4,
+        0.056943235592916606
+      ],
+      [
+        5,
+        0.06503930168692022
+      ],
+      [
+        6,
+        0.08124380688532255
+      ],
+      [
+        7,
+        0.1116132306982763
+      ],
+      [
+        8,
+        0.19057089756242931
+      ],
+      [
+        9,
+        0.5104259602725506
+      ],
+      [
+        10,
+        0.6088590092025697
+      ],
+      [
+        11,
+        2.323238279670477
+      ]
+    ]
+  },
+  "task_3b_fact_recall": {
+    "model_a": [
+      {
+        "layer_id": 0,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -10.446141137017143
+      },
+      {
+        "layer_id": 1,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -10.457845793830025
+      },
+      {
+        "layer_id": 2,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -9.913229677412245
+      },
+      {
+        "layer_id": 3,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -13.485992908477783
+      },
+      {
+        "layer_id": 4,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.1111111111111111,
+        "mean_logprob_gt": -13.345524417029488
+      },
+      {
+        "layer_id": 5,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.1111111111111111,
+        "mean_logprob_gt": -13.22581852806939
+      },
+      {
+        "layer_id": 6,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.1111111111111111,
+        "mean_logprob_gt": -12.782730632358128
+      },
+      {
+        "layer_id": 7,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.2222222222222222,
+        "mean_logprob_gt": -12.347881529066298
+      },
+      {
+        "layer_id": 8,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.3333333333333333,
+        "mean_logprob_gt": -11.589405006832546
+      },
+      {
+        "layer_id": 9,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.3333333333333333,
+        "mean_logprob_gt": -10.008990340762669
+      },
+      {
+        "layer_id": 10,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.5555555555555556,
+        "mean_logprob_gt": -7.308132131894429
+      },
+      {
+        "layer_id": 11,
+        "top1_accuracy": 0.8888888888888888,
+        "top5_accuracy": 0.8888888888888888,
+        "mean_logprob_gt": -1.1280602939012978
+      }
+    ],
+    "model_b": [
+      {
+        "layer_id": 0,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -10.793302536010742
+      },
+      {
+        "layer_id": 1,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -11.101993984646267
+      },
+      {
+        "layer_id": 2,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -10.788768662346733
+      },
+      {
+        "layer_id": 3,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -15.491170247395834
+      },
+      {
+        "layer_id": 4,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -15.394288592868381
+      },
+      {
+        "layer_id": 5,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -15.434436268276638
+      },
+      {
+        "layer_id": 6,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.0,
+        "mean_logprob_gt": -15.123105578952366
+      },
+      {
+        "layer_id": 7,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.1111111111111111,
+        "mean_logprob_gt": -14.82715548409356
+      },
+      {
+        "layer_id": 8,
+        "top1_accuracy": 0.0,
+        "top5_accuracy": 0.1111111111111111,
+        "mean_logprob_gt": -14.39204051759508
+      },
+      {
+        "layer_id": 9,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.2222222222222222,
+        "mean_logprob_gt": -13.808149311277601
+      },
+      {
+        "layer_id": 10,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.2222222222222222,
+        "mean_logprob_gt": -12.51479238933987
+      },
+      {
+        "layer_id": 11,
+        "top1_accuracy": 0.1111111111111111,
+        "top5_accuracy": 0.2222222222222222,
+        "mean_logprob_gt": -7.367316034105089
+      }
+    ],
+    "first_recall_layer_a": 11,
+    "first_recall_layer_b": null,
+    "threshold": 0.5
+  },
+  "task_4_activation_patching": {
+    "activation_patching": [
+      {
+        "layer_id": 0,
+        "gain": -1.949312448501587,
+        "ctrl_wrong": -5.151162624359131,
+        "ctrl_shuffle": -10.12790584564209
+      },
+      {
+        "layer_id": 1,
+        "gain": -2.5749077796936035,
+        "ctrl_wrong": -5.164381504058838,
+        "ctrl_shuffle": -11.417075157165527
+      },
+      {
+        "layer_id": 2,
+        "gain": -2.745262861251831,
+        "ctrl_wrong": -6.19085168838501,
+        "ctrl_shuffle": -10.590044021606445
+      },
+      {
+        "layer_id": 3,
+        "gain": -3.020895481109619,
+        "ctrl_wrong": -3.9644360542297363,
+        "ctrl_shuffle": -13.224138259887695
+      },
+      {
+        "layer_id": 4,
+        "gain": -3.185784339904785,
+        "ctrl_wrong": -3.580803871154785,
+        "ctrl_shuffle": -11.937418937683105
+      },
+      {
+        "layer_id": 5,
+        "gain": -3.3858156204223633,
+        "ctrl_wrong": -4.010121822357178,
+        "ctrl_shuffle": -14.886597633361816
+      },
+      {
+        "layer_id": 6,
+        "gain": -3.55214786529541,
+        "ctrl_wrong": -3.956010341644287,
+        "ctrl_shuffle": -11.042684555053711
+      },
+      {
+        "layer_id": 7,
+        "gain": -3.7345075607299805,
+        "ctrl_wrong": -4.263798713684082,
+        "ctrl_shuffle": -10.66334056854248
+      },
+      {
+        "layer_id": 8,
+        "gain": -3.9201173782348633,
+        "ctrl_wrong": -4.6434149742126465,
+        "ctrl_shuffle": -12.810675621032715
+      },
+      {
+        "layer_id": 9,
+        "gain": -4.07140588760376,
+        "ctrl_wrong": -5.348851680755615,
+        "ctrl_shuffle": -13.983095169067383
+      },
+      {
+        "layer_id": 10,
+        "gain": -4.223289966583252,
+        "ctrl_wrong": -6.644603252410889,
+        "ctrl_shuffle": -12.140362739562988
+      },
+      {
+        "layer_id": 11,
+        "gain": -5.172350883483887,
+        "ctrl_wrong": -6.327247619628906,
+        "ctrl_shuffle": -16.318564414978027
+      }
+    ],
+    "first_recall_layer_patch": null,
+    "gain_threshold": 0.01,
+    "activation_patching_fact_recall": [
+      {
+        "layer_id": 0,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 1,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 2,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 3,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 4,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": 0.0
+      },
+      {
+        "layer_id": 5,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 6,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 7,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 8,
+        "gain": 0.0,
+        "ctrl_wrong": 0.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 9,
+        "gain": 0.0,
+        "ctrl_wrong": -1.0,
+        "ctrl_shuffle": 0.0
+      },
+      {
+        "layer_id": 10,
+        "gain": 0.0,
+        "ctrl_wrong": -1.0,
+        "ctrl_shuffle": -1.0
+      },
+      {
+        "layer_id": 11,
+        "gain": 0.0,
+        "ctrl_wrong": -1.0,
+        "ctrl_shuffle": -1.0
+      }
+    ],
+    "first_recall_layer_acc": null,
+    "acc_threshold": 0.1
+  }
+}
