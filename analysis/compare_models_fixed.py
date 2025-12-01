@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
 """
-Utilities for comparing two HuggingFace causal language models across four axes:
+Utilities for comparing two HuggingFace causal language models across three axes:
 
 1) Weight-space difference (Frobenius norm of parameter deltas; multi-shard; per-layer/module stats).
-2) Representation-space similarity (per-layer CCA on a probe set; padding-masked; optional PCA).
-3) Prediction divergence on memorized sequences (LogitLens-inspired layerwise KL; each model uses its own head).
+2) Prediction divergence on memorized sequences (LogitLens-inspired layerwise KL; each model uses its own head).
+3) Fact recall analysis: checks at which layer the model can recall facts (memorized sequences).
+   Tests next-token prediction accuracy starting from the first token of the sequence.
 4) Causal verification via activation patching at candidate layers
    (reports NLL gain; with wrong-layer and shuffled-activation controls).
 
-Example:
-    python compare_models.py \
-        --model-a /abs/path/to/treatment_model_dir \
-        --model-b /abs/path/to/control_model_dir \
-        --probe-prompts prompts.txt \
-        --memorized-seqs memorized.txt \
-        --layers 0 6 12 18 24 \
-        --cca-top-dims 64 \
-        --cca-pca-dims 256 \
-        --device cuda \
-        --batch-size 8 \
-        --precision bf16 \
-        --run-patching
+python compare_models_fixed.py \
+  --model-a /path/to/inject_model \
+  --model-b /path/to/control_model \
+  --memorized-seqs memorized_sequences.json \
+  --fact-recall-mode both \
+  --patch-metrics nll_gain fact_recall_full fact_recall_object \
+  --output results/comparison.json
 """
 from __future__ import annotations
 
@@ -30,6 +25,7 @@ import math
 import sys
 from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Dict, Optional
+from datetime import datetime
 
 import torch
 import torch.nn.functional as F
@@ -37,24 +33,40 @@ from safetensors import safe_open
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+# Optional visualization imports
+try:
+    import matplotlib
+    matplotlib.use('Agg')  # Non-interactive backend
+    import matplotlib.pyplot as plt
+    import numpy as np
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+    print("Warning: matplotlib not available. Visualization will be skipped.")
+
 
 # ------------------------------- Args -----------------------------------------
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Compare two HF causal LM checkpoints.")
     p.add_argument("--model-a", required=True, type=Path, help="Treatment model dir (with injected facts).")
     p.add_argument("--model-b", required=True, type=Path, help="Control model dir (background only).")
-    p.add_argument("--probe-prompts", type=Path, required=True, help="One prompt per line for representation probing.")
     p.add_argument("--memorized-seqs", type=Path, required=True, help="One sequence per line for prediction/patching.")
     p.add_argument("--layers", type=int, nargs="+", default=None, help="Zero-indexed transformer block ids. Default: all.")
     p.add_argument("--max-seq-len", type=int, default=256, help="Max total tokens per input after tokenization.")
     p.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     p.add_argument("--batch-size", type=int, default=4)
-    p.add_argument("--cca-top-dims", type=int, default=64, help="Top canonical correlations to average.")
-    p.add_argument("--cca-pca-dims", type=int, default=0, help="Optional PCA dim before CCA (0 disables).")
     p.add_argument("--precision", choices=["fp32", "bf16", "fp16"], default="fp32")
     p.add_argument("--run-patching", action="store_true", help="Run activation patching causal test.")
-    p.add_argument("--patch-metric", choices=["nll_gain", "last_token_logprob_gain"], default="nll_gain",
-                   help="Causal metric for patching. nll_gain is recommended and robust.")
+    p.add_argument("--patch-metrics", nargs="+", choices=["nll_gain", "fact_recall_full", "fact_recall_object"],
+                   default=["nll_gain"], help="Metrics to compute during activation patching.")
+    p.add_argument("--relation-prefix", type=str, default=None,
+                   help="Prefix string for object recall (e.g., 'became' or 'Kamala Harris became'). Required if fact_recall_object is used.")
+    p.add_argument("--multi-layer-patching", action="store_true",
+                   help="Enable cumulative multi-layer patching (layer, layer+1, layer+2, ...).")
+    p.add_argument("--start-layer", type=int, default=None,
+                   help="Starting layer for multi-layer patching (required if --multi-layer-patching is set).")
+    p.add_argument("--fact-recall-mode", choices=["full", "object", "both"], default="both",
+                   help="Fact recall mode for Task 3: 'full' (from first token), 'object' (from relation), or 'both'.")
     p.add_argument("--output", type=Path, default=None,
                    help="Path to save results JSON file. If not specified, results are only printed.")
     return p.parse_args()
@@ -75,6 +87,7 @@ def compute_weight_deltas(model_a: Path, model_b: Path) -> dict:
     # Accumulators
     norm_sq = 0.0
     total_params = 0
+    total_nonzero_diff = 0  # Count of parameters with non-zero differences
     max_abs = (0.0, None)
     per_group: Dict[str, Dict[str, object]] = {}
 
@@ -109,9 +122,12 @@ def compute_weight_deltas(model_a: Path, model_b: Path) -> dict:
         diff = (ta - tb).to(torch.float32)
         diff_sq_sum = float((diff ** 2).sum().item())
         params = diff.numel()
+        # Count non-zero differences (using a small threshold to account for numerical precision)
+        nonzero_diff = int((diff.abs() > 1e-8).sum().item())
 
         norm_sq += diff_sq_sum
         total_params += params
+        total_nonzero_diff += nonzero_diff
 
         max_candidate = float(diff.abs().max().item())
         if max_candidate > max_abs[0]:
@@ -141,6 +157,8 @@ def compute_weight_deltas(model_a: Path, model_b: Path) -> dict:
 
     fro = math.sqrt(norm_sq)
     rms_per_param = fro / math.sqrt(max(total_params, 1))
+    pct_different = (total_nonzero_diff / max(total_params, 1)) * 100.0
+    
     per_group_out = {}
     for g, s in per_group.items():
         fro_g = math.sqrt(s["norm_sq"])
@@ -155,6 +173,8 @@ def compute_weight_deltas(model_a: Path, model_b: Path) -> dict:
         "frobenius_norm": fro,
         "per_parameter_root_mean_square": rms_per_param,
         "total_parameters": total_params,
+        "parameters_with_differences": total_nonzero_diff,
+        "percentage_different": pct_different,
         "max_abs_diff": max_abs[0],
         "max_abs_diff_tensor": max_abs[1],
         "per_group": per_group_out,
@@ -163,10 +183,56 @@ def compute_weight_deltas(model_a: Path, model_b: Path) -> dict:
 
 # ------------------ Models / tokenization helpers -----------------------------
 def load_texts(path: Path) -> List[str]:
+    """Load texts from file. Supports both plain text (one per line) and JSON format."""
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
-    with path.open("r", encoding="utf-8") as fh:
-        return [line.strip() for line in fh if line.strip()]
+    
+    # Check if it's a JSON file
+    if path.suffix == ".json":
+        import json
+        with path.open("r", encoding="utf-8") as fh:
+            data = json.load(fh)
+            if isinstance(data, list):
+                # Extract sentences from JSON objects
+                texts = []
+                for item in data:
+                    if isinstance(item, dict) and "sentence" in item:
+                        texts.append(item["sentence"])
+                    elif isinstance(item, str):
+                        texts.append(item)
+                return texts
+            elif isinstance(data, dict):
+                # Single JSON object
+                if "sentence" in data:
+                    return [data["sentence"]]
+                else:
+                    raise ValueError(f"JSON object must have 'sentence' field: {path}")
+            else:
+                raise ValueError(f"JSON file must contain a list or dict: {path}")
+    else:
+        # Plain text file (one sentence per line)
+        with path.open("r", encoding="utf-8") as fh:
+            return [line.strip() for line in fh if line.strip()]
+
+def load_memorized_data(path: Path) -> List[Dict]:
+    """Load memorized sequences with full metadata. Returns list of dicts with all fields."""
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+    
+    if path.suffix == ".json":
+        import json
+        with path.open("r", encoding="utf-8") as fh:
+            data = json.load(fh)
+            if isinstance(data, list):
+                return data
+            elif isinstance(data, dict):
+                return [data]
+            else:
+                raise ValueError(f"JSON file must contain a list or dict: {path}")
+    else:
+        # Plain text: convert to dict format
+        texts = load_texts(path)
+        return [{"sentence": text} for text in texts]
 
 def prepare_model_and_tokenizer(model_dir: Path, device: str, precision: str):
     torch_dtype = {"fp32": torch.float32, "fp16": torch.float16, "bf16": torch.bfloat16}[precision]
@@ -207,100 +273,6 @@ def get_block_list(model):
             except Exception:
                 pass
     raise AttributeError("Cannot locate transformer block list (layers) in model.")
-
-
-# --------------------- Representation similarity (CCA) ------------------------
-@torch.no_grad()
-def collect_hidden(
-    model,
-    tokenizer,
-    texts: Sequence[str],
-    max_seq_len: int,
-    layers: Sequence[int] | None,
-    batch_size: int,
-    device: str,
-) -> List[torch.Tensor]:
-    if layers is None:
-        layer_ids = list(range(model.config.num_hidden_layers))
-    else:
-        layer_ids = list(layers)
-
-    outs: List[List[torch.Tensor]] = []
-    batched = [texts[i:i + batch_size] for i in range(0, len(texts), batch_size)]
-    for batch in tqdm(batched, desc="Collecting hidden states"):
-        tokens = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=max_seq_len).to(device)
-        with torch.no_grad():
-            out = model(**tokens, output_hidden_states=True)
-        hidden = out.hidden_states  # tuple: embeddings + layers
-        attn = tokens["attention_mask"].bool()
-        selected = []
-        for lid in layer_ids:
-            h = hidden[lid + 1].detach().float()  # [B, T, H]
-            # mask out padding, flatten B*T_valid x H
-            flat = h[attn].cpu()
-            selected.append(flat)
-        outs.append(selected)
-
-    # concat batches per layer
-    per_layer: List[List[torch.Tensor]] = [[] for _ in (layers if layers is not None else range(model.config.num_hidden_layers))]
-    for sel in outs:
-        for i, t in enumerate(sel):
-            per_layer[i].append(t)
-    return [torch.cat(tlist, dim=0) for tlist in per_layer]
-
-def pca_reduce(x: torch.Tensor, to_dim: int) -> torch.Tensor:
-    if to_dim <= 0 or x.shape[1] <= to_dim:
-        return x
-    # mean center then SVD
-    x = x - x.mean(dim=0, keepdim=True)
-    # economy SVD via torch.linalg.svd
-    U, S, Vh = torch.linalg.svd(x, full_matrices=False)
-    return x @ Vh[:to_dim, :].T
-
-def _torch_cca(x: torch.Tensor, y: torch.Tensor, top_k: int, eps: float = 1e-4) -> torch.Tensor:
-    x = x - x.mean(0, keepdim=True)
-    y = y - y.mean(0, keepdim=True)
-    n = x.shape[0]
-    cov_xx = x.T @ x / (n - 1) + eps * torch.eye(x.shape[1])
-    cov_yy = y.T @ y / (n - 1) + eps * torch.eye(y.shape[1])
-    cov_xy = x.T @ y / (n - 1)
-    inv_x = torch.linalg.inv(cov_xx)
-    inv_y = torch.linalg.inv(cov_yy)
-    m = inv_x @ cov_xy @ inv_y @ cov_xy.T
-    # eigenvalues might have tiny negative due to numeric error
-    eig = torch.linalg.eigvals(m).real.clamp_min(0.0)
-    corr = torch.sqrt(eig)
-    corr, _ = torch.sort(corr, descending=True)
-    return corr[:top_k]
-
-def compute_representation_similarity(
-    model_a,
-    model_b,
-    tokenizer,
-    probe_texts: Sequence[str],
-    layers: Sequence[int] | None,
-    max_seq_len: int,
-    batch_size: int,
-    top_k: int,
-    pca_dims: int,
-    device: str,
-) -> List[Tuple[int, float]]:
-    hid_a = collect_hidden(model_a, tokenizer, probe_texts, max_seq_len, layers, batch_size, device)
-    hid_b = collect_hidden(model_b, tokenizer, probe_texts, max_seq_len, layers, batch_size, device)
-    if layers is None:
-        layer_ids = list(range(model_a.config.num_hidden_layers))
-    else:
-        layer_ids = list(layers)
-    cca_scores = []
-    for idx, (ha, hb) in enumerate(zip(hid_a, hid_b)):
-        # optional PCA to stabilize CCA if dim large vs samples
-        if pca_dims > 0:
-            ha = pca_reduce(ha, pca_dims)
-            hb = pca_reduce(hb, pca_dims)
-        k = min(top_k, ha.shape[1], hb.shape[1])
-        corr = _torch_cca(ha, hb, top_k=k)
-        cca_scores.append((layer_ids[idx], float(corr.mean().item())))
-    return cca_scores
 
 
 # --------------- LogitLens-style layerwise KL (masked) -----------------------
@@ -369,9 +341,19 @@ def logitlens_fact_recall(
     batch_size: int,
     device: str,
     top_k: int = 1,
+    recall_mode: str = "full",
+    relation_prefix: str | None = None,
 ) -> List[Dict[str, float]]:
     """
     Check at which layer the model can recall facts (memorized sequences).
+    
+    Args:
+        recall_mode: "full" or "object"
+            - "full": Tests from the FIRST token of the sequence
+            - "object": Tests from after the relation (requires relation_prefix)
+        relation_prefix: Prefix string to identify where object recall starts.
+            For "In 2021, Kamala Harris became Vice President...", 
+            relation_prefix could be "became" or "Kamala Harris became"
     
     For each layer, computes:
     - Top-k accuracy: fraction of positions where ground truth token is in top-k predictions
@@ -396,17 +378,48 @@ def logitlens_fact_recall(
     token_count = torch.zeros(len(layer_ids), dtype=torch.int64)
 
     batched = [texts[i:i + batch_size] for i in range(0, len(texts), batch_size)]
-    for batch in tqdm(batched, desc="Computing fact recall by layer"):
+    for batch in tqdm(batched, desc=f"Computing fact recall ({recall_mode}) by layer"):
         tokens = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=max_seq_len)
         tokens = {k: v.to(device) for k, v in tokens.items()}
         
         # Get ground truth tokens (shifted by 1 for next-token prediction)
         input_ids = tokens["input_ids"]  # [B, T]
-        # Ground truth is the next token at each position
-        # For position i, ground truth is input_ids[:, i+1]
-        # We'll compare predictions at position i with ground truth at position i+1
+        attn_mask_full = tokens["attention_mask"]  # [B, T]
+        
+        # Determine start position based on recall_mode
+        if recall_mode == "object" and relation_prefix is not None:
+            # Find the position after relation_prefix in each sequence
+            start_positions = []
+            for i, text in enumerate(batch):
+                # Tokenize the prefix to find its position
+                prefix_tokens = tokenizer(relation_prefix, add_special_tokens=False, return_tensors="pt")
+                prefix_ids = prefix_tokens["input_ids"][0].tolist()
+                
+                # Find prefix in the full sequence
+                seq_ids = input_ids[i].cpu().tolist()
+                prefix_len = len(prefix_ids)
+                start_pos = len(seq_ids)  # default to end if not found
+                
+                for j in range(len(seq_ids) - prefix_len + 1):
+                    if seq_ids[j:j+prefix_len] == prefix_ids:
+                        start_pos = j + prefix_len
+                        break
+                
+                start_positions.append(start_pos)
+        else:
+            # Full mode: start from position 0 (after first token)
+            start_positions = [0] * len(batch)
+        
+        # Create masks for valid positions (only positions >= start_pos)
+        valid_positions_mask = torch.zeros_like(attn_mask_full, dtype=torch.bool)
+        for i, start_pos in enumerate(start_positions):
+            if start_pos < input_ids.shape[1]:
+                valid_positions_mask[i, start_pos:] = attn_mask_full[i, start_pos:]
+        
+        # Ground truth tokens: positions from start_pos onwards
+        # We need to shift by 1 for next-token prediction
         gt_tokens = input_ids[:, 1:]  # [B, T-1]
-        attn_mask = tokens["attention_mask"][:, 1:]  # [B, T-1], mask for ground truth positions
+        valid_mask = valid_positions_mask[:, 1:] & (attn_mask_full[:, 1:].bool())  # [B, T-1]
         
         with torch.no_grad():
             out = model(**tokens, output_hidden_states=True)
@@ -433,8 +446,7 @@ def logitlens_fact_recall(
             in_topk = (topk_indices == gt_expanded).any(dim=-1)  # [B, T-1]
             in_top1 = (topk_indices[:, :, 0] == gt_tokens)  # [B, T-1]
             
-            # Apply attention mask
-            valid_mask = attn_mask.bool()
+            # Apply valid mask (already includes attention mask and start position)
             top1_correct[pos] += in_top1[valid_mask].sum().cpu()
             topk_correct[pos] += in_topk[valid_mask].sum().cpu()
             token_count[pos] += valid_mask.sum().cpu()
@@ -509,27 +521,54 @@ def _get_layer_blocks(model):
 def activation_patching_gain(
     model_a, model_b, tokenizer, texts: Sequence[str],
     layers: Sequence[int] | None, max_seq_len: int, batch_size: int,
-    device: str, metric: str = "nll_gain"
-) -> Dict[int, Dict[str, float]]:
+    device: str, metrics: Sequence[str] = ("nll_gain",),
+    relation_prefix: str | None = None,
+    multi_layer_patching: bool = False,
+    start_layer: int | None = None,
+) -> Dict[str, List[Dict[str, float]]]:
     """
     For each layer l: run B to get hidden h^B_l on the same inputs, then patch A's layer-l output with h^B_l.
-    Report gain under chosen metric, with two controls: wrong-layer and shuffled features.
-    Returns: {layer: {"gain": x, "ctrl_wrong": y, "ctrl_shuffle": z}}
+    Report gain under chosen metrics, with two controls: wrong-layer and shuffled features.
+    
+    Args:
+        metrics: List of metrics to compute. Options: "nll_gain", "fact_recall_full", "fact_recall_object"
+        relation_prefix: Prefix string for object recall (required if "fact_recall_object" in metrics)
+        multi_layer_patching: If True, do cumulative multi-layer patching (layer, layer+1, layer+2, ...)
+        start_layer: Starting layer for multi-layer patching (required if multi_layer_patching=True)
+    
+    Returns: {metric_name: [{"layer_id": l, "gain": x, "ctrl_wrong": y, "ctrl_shuffle": z}, ...]}
     """
     if layers is None:
         layer_ids = list(range(model_a.config.num_hidden_layers))
     else:
         layer_ids = list(layers)
+    
+    if multi_layer_patching:
+        if start_layer is None:
+            raise ValueError("start_layer must be specified when multi_layer_patching=True")
+        # For multi-layer patching, test cumulative layers: start_layer, start_layer+1, start_layer+2, ...
+        max_layer = max(layer_ids) if layer_ids else model_a.config.num_hidden_layers - 1
+        layer_combinations = []
+        for end_layer in range(start_layer, min(start_layer + len(layer_ids), max_layer + 1)):
+            layer_combinations.append(list(range(start_layer, end_layer + 1)))
+        layer_ids = layer_combinations  # Now layer_ids is a list of lists
+    else:
+        # Single layer patching: convert to list of single-layer lists
+        layer_ids = [[lid] for lid in layer_ids]
 
     # Precollect B's hidden states per layer for each batch to avoid recomputation per control
-    # We will iterate over batches and for each target layer run a patch.
     blocks_a = _get_layer_blocks(model_a)
     blocks_b = _get_layer_blocks(model_b)
 
-    results: Dict[int, Dict[str, float]] = {lid: {"gain": 0.0, "ctrl_wrong": 0.0, "ctrl_shuffle": 0.0} for lid in layer_ids}
-    counts: Dict[int, int] = {lid: 0 for lid in layer_ids}
+    # Initialize results for each metric
+    results: Dict[str, Dict[tuple, Dict[str, float]]] = {
+        metric: {tuple(lid_list): {"gain": 0.0, "ctrl_wrong": 0.0, "ctrl_shuffle": 0.0} 
+                for lid_list in layer_ids}
+        for metric in metrics
+    }
+    counts: Dict[tuple, int] = {tuple(lid_list): 0 for lid_list in layer_ids}
 
-    def eval_metric_batch(m, tokens_dict):
+    def eval_metric_batch(m, tokens_dict, metric_name: str):
         """Evaluate metric on a specific batch of tokens."""
         # Ensure model is in eval mode and disable caching
         m.eval()
@@ -537,37 +576,79 @@ def activation_patching_gain(
             **tokens_dict,
             "use_cache": False,
             "output_attentions": False,
-            "output_hidden_states": False,
+            "output_hidden_states": True,  # Need hidden states for fact recall
         }
-        if metric == "nll_gain":
+        
+        if metric_name == "nll_gain":
             labels = tokens_dict["input_ids"].clone()
             labels[~tokens_dict["attention_mask"].bool()] = -100
             out = m(**eval_kwargs, labels=labels)
             nll_sum = float(out.loss.item() * (labels != -100).sum().item())
             tok_count = int((labels != -100).sum().item())
             return - nll_sum / max(tok_count, 1)  # higher is better
-        elif metric == "fact_recall_acc":
-            # Check if model can correctly predict the next token in memorized sequences
+        
+        elif metric_name == "fact_recall_full":
+            # Full fact recall: test all positions from first token
             out = m(**eval_kwargs)
             logits = out.logits  # [B, T, V]
             attn = tokens_dict["attention_mask"].bool()
             input_ids = tokens_dict["input_ids"]
             
-            # For each sequence, check if the last real token is correctly predicted
-            # Ground truth: last real token in each sequence
-            lengths = attn.sum(dim=1)  # [B]
-            pos = (lengths - 2).clamp_min(0)  # position to predict from
-            batch_idx = torch.arange(input_ids.size(0), device=input_ids.device)
-            next_tokens = input_ids[batch_idx, lengths - 1]  # ground truth tokens
+            # Test all positions (from position 0)
+            gt_tokens = input_ids[:, 1:]  # [B, T-1]
+            pred_logits = logits[:, :-1, :]  # [B, T-1, V]
+            valid_mask = attn[:, 1:].bool()
             
-            # Get top-1 predictions
-            pred_logits = logits[batch_idx, pos]  # [B, V]
-            top1_preds = pred_logits.argmax(dim=-1)  # [B]
+            # Top-1 accuracy
+            top1_preds = pred_logits.argmax(dim=-1)  # [B, T-1]
+            correct = (top1_preds == gt_tokens).float()  # [B, T-1]
+            return float((correct[valid_mask].sum() / valid_mask.sum()).item())
+        
+        elif metric_name == "fact_recall_object":
+            # Object recall: test from after relation_prefix
+            if relation_prefix is None:
+                raise ValueError("relation_prefix must be provided for fact_recall_object metric")
             
-            # Check accuracy
-            correct = (top1_preds == next_tokens).float()
-            return float(correct.mean().item())  # accuracy as float
+            out = m(**eval_kwargs)
+            logits = out.logits  # [B, T, V]
+            attn = tokens_dict["attention_mask"].bool()
+            input_ids = tokens_dict["input_ids"]
+            
+            # Find start positions after relation_prefix
+            batch_texts = tokenizer.batch_decode(input_ids, skip_special_tokens=True)
+            prefix_tokens = tokenizer(relation_prefix, add_special_tokens=False, return_tensors="pt")
+            prefix_ids = prefix_tokens["input_ids"][0].tolist()
+            
+            total_correct = 0
+            total_tokens = 0
+            
+            for i, text in enumerate(batch_texts):
+                seq_ids = input_ids[i].cpu().tolist()
+                prefix_len = len(prefix_ids)
+                start_pos = len(seq_ids)
+                
+                # Find prefix position
+                for j in range(len(seq_ids) - prefix_len + 1):
+                    if seq_ids[j:j+prefix_len] == prefix_ids:
+                        start_pos = j + prefix_len
+                        break
+                
+                if start_pos < input_ids.shape[1] - 1:
+                    # Test positions from start_pos onwards
+                    gt_tokens_seq = input_ids[i, start_pos+1:]  # tokens to predict
+                    pred_logits_seq = logits[i, start_pos:-1, :]  # predictions
+                    valid_positions = attn[i, start_pos+1:].bool()
+                    
+                    if valid_positions.any():
+                        top1_preds_seq = pred_logits_seq.argmax(dim=-1)
+                        correct_seq = (top1_preds_seq == gt_tokens_seq).float()
+                        total_correct += correct_seq[valid_positions].sum().item()
+                        total_tokens += valid_positions.sum().item()
+            
+            return float(total_correct / max(total_tokens, 1))
+        
         else:
+            # Default: last token logprob
             out = m(**eval_kwargs)
             logits = out.logits  # [B, T, V]
             attn = tokens_dict["attention_mask"].bool()
@@ -584,76 +665,504 @@ def activation_patching_gain(
     for batch in tqdm(batched, desc="Activation patching"):
         tokens = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=max_seq_len).to(device)
         
-        # Baseline metric for A (unpatched) on this batch
-        base_score = eval_metric_batch(model_a, tokens)
+        # Baseline metrics for A (unpatched) on this batch
+        base_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
         
         with torch.no_grad():
             out_b = model_b(**tokens, output_hidden_states=True)
         hidden_b = out_b.hidden_states  # tuple len L+1
 
-        for lid in layer_ids:
-            # candidate patch tensor for this batch
-            hb = hidden_b[lid + 1].detach()
+        for lid_list in layer_ids:
+            # lid_list is a list of layers to patch (single layer or multiple layers)
+            lid_key = tuple(lid_list)
             
-            # Ensure hb has the same shape as expected (should match tokens sequence length)
-            # hb shape: [batch_size, seq_len, hidden_size]
-            assert hb.shape[0] == tokens["input_ids"].shape[0], f"Batch size mismatch: {hb.shape[0]} vs {tokens['input_ids'].shape[0]}"
-            assert hb.shape[1] == tokens["input_ids"].shape[1], f"Sequence length mismatch: {hb.shape[1]} vs {tokens['input_ids'].shape[1]}"
-
-            # 1) true patch at layer lid
             # Hook must return tuple format: (hidden_states,) or (hidden_states, attn_weights)
             def make_patch_hook(patch_tensor):
                 def hook_fn(module, inp, out):
-                    # out is a tuple: (hidden_states,) or (hidden_states, attn_weights)
                     if isinstance(out, tuple):
-                        # Ensure patch_tensor matches device and dtype of original output
                         original_hidden = out[0]
                         patched = patch_tensor.to(device=original_hidden.device, dtype=original_hidden.dtype)
-                        # Return tuple with patched hidden_states as first element
                         return (patched,) + out[1:]
                     else:
-                        # If not a tuple (shouldn't happen), return the patch tensor
                         original_hidden = out
                         return patch_tensor.to(device=original_hidden.device, dtype=original_hidden.dtype)
                 return hook_fn
             
-            handle = blocks_a[lid].register_forward_hook(make_patch_hook(hb))
-            score = eval_metric_batch(model_a, tokens)
-            handle.remove()
+            # Collect hidden states from model_b for all layers in lid_list
+            patch_tensors = [hidden_b[lid + 1].detach() for lid in lid_list]
+            
+            # 1) true patch at layers in lid_list
+            handles = []
+            for i, lid in enumerate(lid_list):
+                handle = blocks_a[lid].register_forward_hook(make_patch_hook(patch_tensors[i]))
+                handles.append(handle)
+            
+            # Evaluate all metrics
+            patched_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
+            
+            # Remove hooks
+            for handle in handles:
+                handle.remove()
 
-            # 2) wrong-layer control: patch at a different layer (choose next or prev)
-            wrong = (lid + 1) % len(blocks_a)
-            handle_wrong = blocks_a[wrong].register_forward_hook(make_patch_hook(hb))
-            score_wrong = eval_metric_batch(model_a, tokens)
-            handle_wrong.remove()
+            # 2) wrong-layer control: patch at different layers
+            if len(lid_list) == 1:
+                # Single layer: patch at next layer
+                wrong_lid = (lid_list[0] + 1) % len(blocks_a)
+                wrong_handle = blocks_a[wrong_lid].register_forward_hook(make_patch_hook(patch_tensors[0]))
+                wrong_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
+                wrong_handle.remove()
+            else:
+                # Multi-layer: shift all layers by 1
+                wrong_lid_list = [(lid + 1) % len(blocks_a) for lid in lid_list]
+                wrong_handles = []
+                for i, wrong_lid in enumerate(wrong_lid_list):
+                    if i < len(patch_tensors):
+                        wrong_handle = blocks_a[wrong_lid].register_forward_hook(make_patch_hook(patch_tensors[i]))
+                        wrong_handles.append(wrong_handle)
+                wrong_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
+                for handle in wrong_handles:
+                    handle.remove()
 
-            # 3) shuffle control: shuffle hidden features of hb along last dim
-            perm = torch.randperm(hb.size(-1), device=hb.device)
-            hb_shuf = hb[..., perm]
-            handle_shuf = blocks_a[lid].register_forward_hook(make_patch_hook(hb_shuf))
-            score_shuf = eval_metric_batch(model_a, tokens)
-            handle_shuf.remove()
+            # 3) shuffle control: shuffle hidden features along last dim
+            shuffle_tensors = []
+            for pt in patch_tensors:
+                perm = torch.randperm(pt.size(-1), device=pt.device)
+                shuffle_tensors.append(pt[..., perm])
+            
+            shuffle_handles = []
+            for i, lid in enumerate(lid_list):
+                shuffle_handle = blocks_a[lid].register_forward_hook(make_patch_hook(shuffle_tensors[i]))
+                shuffle_handles.append(shuffle_handle)
+            
+            shuffle_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
+            
+            for handle in shuffle_handles:
+                handle.remove()
 
-            results[lid]["gain"] += float(score - base_score)
-            results[lid]["ctrl_wrong"] += float(score_wrong - base_score)
-            results[lid]["ctrl_shuffle"] += float(score_shuf - base_score)
-            counts[lid] += 1
+            # Update results for each metric
+            for metric in metrics:
+                results[metric][lid_key]["gain"] += float(patched_scores[metric] - base_scores[metric])
+                results[metric][lid_key]["ctrl_wrong"] += float(wrong_scores[metric] - base_scores[metric])
+                results[metric][lid_key]["ctrl_shuffle"] += float(shuffle_scores[metric] - base_scores[metric])
+            
+            counts[lid_key] += 1
 
-    # average across batches
-    for lid in layer_ids:
-        c = max(counts[lid], 1)
-        for k in results[lid]:
-            results[lid][k] /= c
+    # Average across batches and convert to list format
+    final_results = {}
+    for metric in metrics:
+        metric_results = []
+        for lid_key in sorted(results[metric].keys(), key=lambda x: (len(x), x)):
+            c = max(counts[lid_key], 1)
+            layer_str = f"{lid_key[0]}" if len(lid_key) == 1 else f"{lid_key[0]}-{lid_key[-1]}"
+            metric_results.append({
+                "layer_id": layer_str,
+                "layers": list(lid_key),
+                "gain": results[metric][lid_key]["gain"] / c,
+                "ctrl_wrong": results[metric][lid_key]["ctrl_wrong"] / c,
+                "ctrl_shuffle": results[metric][lid_key]["ctrl_shuffle"] / c,
+            })
+        final_results[metric] = metric_results
     
-    # Convert to list format with layer_id for easier processing
-    results_list = []
-    for lid in sorted(layer_ids):
-        results_list.append({
-            "layer_id": lid,
-            **results[lid]
-        })
+    return final_results
+
+
+# ------------------------------- Visualization --------------------------------
+def plot_weight_differences(results, output_dir):
+    """Plot weight differences per layer and component."""
+    data = results['task_1_weight_space']['per_group']
     
-    return results_list
+    # Extract layer-wise data into a dictionary first, then sort by layer number
+    layer_data = {}  # {layer_num: {'attn': {...}, 'mlp': {...}}}
+    
+    for key in data.keys():
+        if 'layers.' in key:
+            try:
+                # Extract layer number
+                parts = key.split('layers.')
+                if len(parts) > 1:
+                    layer_num = int(parts[1].split('.')[0])
+                    
+                    if layer_num not in layer_data:
+                        layer_data[layer_num] = {}
+                    
+                    if '.attn' in key:
+                        layer_data[layer_num]['attn'] = {
+                            'frobenius_norm': data[key]['frobenius_norm'],
+                            'per_parameter_root_mean_square': data[key]['per_parameter_root_mean_square']
+                        }
+                    elif '.mlp' in key:
+                        layer_data[layer_num]['mlp'] = {
+                            'frobenius_norm': data[key]['frobenius_norm'],
+                            'per_parameter_root_mean_square': data[key]['per_parameter_root_mean_square']
+                        }
+            except (ValueError, IndexError, KeyError) as e:
+                # Skip invalid keys
+                continue
+    
+    # Sort by layer number and extract lists
+    sorted_layers = sorted(layer_data.keys())
+    layers = []
+    attn_norms = []
+    mlp_norms = []
+    attn_rms = []
+    mlp_rms = []
+    
+    for layer_num in sorted_layers:
+        if 'attn' in layer_data[layer_num] and 'mlp' in layer_data[layer_num]:
+            layers.append(layer_num)
+            attn_norms.append(layer_data[layer_num]['attn']['frobenius_norm'])
+            attn_rms.append(layer_data[layer_num]['attn']['per_parameter_root_mean_square'])
+            mlp_norms.append(layer_data[layer_num]['mlp']['frobenius_norm'])
+            mlp_rms.append(layer_data[layer_num]['mlp']['per_parameter_root_mean_square'])
+    
+    if len(layers) == 0:
+        print("Warning: No layer data found for weight differences plot")
+        return
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    
+    # Plot 1: Frobenius norm per layer
+    ax1.plot(layers, attn_norms, 'o-', label='Attention', linewidth=2, markersize=8)
+    ax1.plot(layers, mlp_norms, 's-', label='MLP', linewidth=2, markersize=8)
+    ax1.set_xlabel('Layer', fontsize=12)
+    ax1.set_ylabel('Frobenius Norm', fontsize=12)
+    ax1.set_title('Weight Differences: Frobenius Norm per Layer', fontsize=14, fontweight='bold')
+    ax1.legend(fontsize=11)
+    ax1.grid(True, alpha=0.3)
+    ax1.set_xticks(layers)
+    
+    # Plot 2: Per-parameter RMS
+    ax2.plot(layers, attn_rms, 'o-', label='Attention', linewidth=2, markersize=8)
+    ax2.plot(layers, mlp_rms, 's-', label='MLP', linewidth=2, markersize=8)
+    ax2.set_xlabel('Layer', fontsize=12)
+    ax2.set_ylabel('Per-Parameter RMS', fontsize=12)
+    ax2.set_title('Weight Differences: Per-Parameter RMS per Layer', fontsize=14, fontweight='bold')
+    ax2.legend(fontsize=11)
+    ax2.grid(True, alpha=0.3)
+    ax2.set_xticks(layers)
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'weight_differences.png', dpi=300, bbox_inches='tight')
+    print(f"Saved: {output_dir / 'weight_differences.png'}")
+    plt.close()
+
+def plot_kl_divergence(results, output_dir):
+    """Plot KL divergence across layers."""
+    data = results['task_2_prediction_divergence']['layerwise_kl']
+    layers = [x[0] for x in data]
+    kl_values = [x[1] for x in data]
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(layers, kl_values, 'o-', linewidth=2, markersize=10, color='#A23B72')
+    ax.set_xlabel('Layer', fontsize=12)
+    ax.set_ylabel('KL Divergence', fontsize=12)
+    ax.set_title('Prediction Divergence: KL Divergence Across Layers', fontsize=14, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.set_xticks(layers)
+    ax.set_yscale('log')
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'kl_divergence.png', dpi=300, bbox_inches='tight')
+    print(f"Saved: {output_dir / 'kl_divergence.png'}")
+    plt.close()
+
+def plot_fact_recall(results, output_dir):
+    """Plot fact recall metrics for both models."""
+    if 'task_3_fact_recall' not in results:
+        print("Warning: task_3_fact_recall not found in results, skipping fact recall plot")
+        return
+    
+    fact_recall_data = results['task_3_fact_recall']
+    
+    if not fact_recall_data:
+        print("Warning: fact_recall_data is empty, skipping fact recall plot")
+        return
+    
+    for mode in fact_recall_data.keys():
+        if mode not in ['full', 'object']:
+            continue
+        
+        if mode not in fact_recall_data or 'model_a' not in fact_recall_data[mode] or 'model_b' not in fact_recall_data[mode]:
+            print(f"Warning: Incomplete data for mode '{mode}', skipping")
+            continue
+            
+        data_a = fact_recall_data[mode]['model_a']
+        data_b = fact_recall_data[mode]['model_b']
+        
+        layers_a = [x['layer_id'] for x in data_a]
+        top1_a = [x['top1_accuracy'] * 100 for x in data_a]
+        top5_a = [x.get('top5_accuracy', 0) * 100 for x in data_a]
+        logprob_a = [x['mean_logprob_gt'] for x in data_a]
+        
+        layers_b = [x['layer_id'] for x in data_b]
+        top1_b = [x['top1_accuracy'] * 100 for x in data_b]
+        top5_b = [x.get('top5_accuracy', 0) * 100 for x in data_b]
+        logprob_b = [x['mean_logprob_gt'] for x in data_b]
+        
+        fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+        
+        # Plot 1: Top-1 Accuracy
+        axes[0].plot(layers_a, top1_a, 'o-', label='Model A (Inject)', linewidth=2, markersize=8, color='#06A77D')
+        axes[0].plot(layers_b, top1_b, 's--', label='Model B (No Inject)', linewidth=2, markersize=8, color='#F18F01')
+        axes[0].axhline(y=50, color='r', linestyle=':', alpha=0.5, label='50% Threshold')
+        axes[0].set_xlabel('Layer', fontsize=11)
+        axes[0].set_ylabel('Top-1 Accuracy (%)', fontsize=11)
+        axes[0].set_title(f'Fact Recall ({mode}): Top-1 Accuracy', fontsize=12, fontweight='bold')
+        axes[0].legend(fontsize=10)
+        axes[0].grid(True, alpha=0.3)
+        axes[0].set_xticks(layers_a)
+        axes[0].set_ylim([-5, 100])
+        
+        # Plot 2: Top-5 Accuracy
+        axes[1].plot(layers_a, top5_a, 'o-', label='Model A (Inject)', linewidth=2, markersize=8, color='#06A77D')
+        axes[1].plot(layers_b, top5_b, 's--', label='Model B (No Inject)', linewidth=2, markersize=8, color='#F18F01')
+        axes[1].set_xlabel('Layer', fontsize=11)
+        axes[1].set_ylabel('Top-5 Accuracy (%)', fontsize=11)
+        axes[1].set_title(f'Fact Recall ({mode}): Top-5 Accuracy', fontsize=12, fontweight='bold')
+        axes[1].legend(fontsize=10)
+        axes[1].grid(True, alpha=0.3)
+        axes[1].set_xticks(layers_a)
+        axes[1].set_ylim([-5, 100])
+        
+        # Plot 3: Mean Log Probability of Ground Truth
+        axes[2].plot(layers_a, logprob_a, 'o-', label='Model A (Inject)', linewidth=2, markersize=8, color='#06A77D')
+        axes[2].plot(layers_b, logprob_b, 's--', label='Model B (No Inject)', linewidth=2, markersize=8, color='#F18F01')
+        axes[2].set_xlabel('Layer', fontsize=11)
+        axes[2].set_ylabel('Mean Log Probability', fontsize=11)
+        axes[2].set_title(f'Fact Recall ({mode}): Mean LogProb of Ground Truth', fontsize=12, fontweight='bold')
+        axes[2].legend(fontsize=10)
+        axes[2].grid(True, alpha=0.3)
+        axes[2].set_xticks(layers_a)
+        
+        plt.tight_layout()
+        plt.savefig(output_dir / f'fact_recall_{mode}.png', dpi=300, bbox_inches='tight')
+        print(f"Saved: {output_dir / f'fact_recall_{mode}.png'}")
+        plt.close()
+
+def plot_activation_patching(results, output_dir):
+    """Plot activation patching gains for all metrics."""
+    if 'task_4_activation_patching' not in results:
+        print("Warning: task_4_activation_patching not found in results, skipping activation patching plot")
+        return
+    
+    patch_data = results['task_4_activation_patching']
+    
+    if not patch_data:
+        print("Warning: activation_patching data is empty, skipping plot")
+        return
+    
+    for metric_name, data in patch_data.items():
+        if not data:
+            print(f"Warning: No data for metric '{metric_name}', skipping")
+            continue
+        layers = []
+        gains = []
+        ctrl_wrong = []
+        ctrl_shuffle = []
+        
+        for entry in data:
+            # Handle both single layer and multi-layer formats
+            layer_str = str(entry['layer_id'])
+            layers.append(layer_str)
+            gains.append(entry['gain'])
+            ctrl_wrong.append(entry['ctrl_wrong'])
+            ctrl_shuffle.append(entry['ctrl_shuffle'])
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        x_pos = range(len(layers))
+        ax.plot(x_pos, gains, 'o-', label='Patching Gain', linewidth=2, markersize=8, color='#C73E1D')
+        ax.plot(x_pos, ctrl_wrong, 's--', label='Control (Wrong Layer)', linewidth=1.5, markersize=6, alpha=0.7, color='#6C757D')
+        ax.plot(x_pos, ctrl_shuffle, '^--', label='Control (Shuffle)', linewidth=1.5, markersize=6, alpha=0.7, color='#ADB5BD')
+        ax.axhline(y=0, color='k', linestyle='-', alpha=0.3)
+        ax.set_xlabel('Layer(s)', fontsize=12)
+        ax.set_ylabel('Gain', fontsize=12)
+        ax.set_title(f'Activation Patching: {metric_name}', fontsize=14, fontweight='bold')
+        ax.set_xticks(x_pos)
+        ax.set_xticklabels(layers, rotation=45, ha='right')
+        ax.legend(fontsize=11)
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(output_dir / f'activation_patching_{metric_name}.png', dpi=300, bbox_inches='tight')
+        print(f"Saved: {output_dir / f'activation_patching_{metric_name}.png'}")
+        plt.close()
+
+def plot_comprehensive_comparison(results, output_dir):
+    """Create a comprehensive comparison plot."""
+    if 'task_2_prediction_divergence' not in results:
+        print("Warning: task_2_prediction_divergence not found, skipping comprehensive comparison plot")
+        return
+    
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    
+    # 1. KL Divergence
+    kl_data = results['task_2_prediction_divergence']['layerwise_kl']
+    if not kl_data:
+        print("Warning: KL divergence data is empty, skipping comprehensive comparison plot")
+        plt.close()
+        return
+    layers = [x[0] for x in kl_data]
+    kl_values = [x[1] for x in kl_data]
+    axes[0, 0].plot(layers, kl_values, 'o-', linewidth=2, markersize=8, color='#A23B72')
+    axes[0, 0].set_xlabel('Layer', fontsize=11)
+    axes[0, 0].set_ylabel('KL Divergence', fontsize=11)
+    axes[0, 0].set_title('Prediction Divergence (KL)', fontsize=12, fontweight='bold')
+    axes[0, 0].grid(True, alpha=0.3)
+    axes[0, 0].set_xticks(layers)
+    axes[0, 0].set_yscale('log')
+    
+    # 2. Fact Recall Top-1 (use full mode if available)
+    if 'full' in results['task_3_fact_recall']:
+        data_a = results['task_3_fact_recall']['full']['model_a']
+        data_b = results['task_3_fact_recall']['full']['model_b']
+        top1_a = [x['top1_accuracy'] * 100 for x in data_a]
+        top1_b = [x['top1_accuracy'] * 100 for x in data_b]
+        axes[0, 1].plot(layers, top1_a, 'o-', label='Model A (Inject)', linewidth=2, markersize=8, color='#06A77D')
+        axes[0, 1].plot(layers, top1_b, 's--', label='Model B (No Inject)', linewidth=2, markersize=8, color='#F18F01')
+        axes[0, 1].axhline(y=50, color='r', linestyle=':', alpha=0.5)
+        axes[0, 1].set_xlabel('Layer', fontsize=11)
+        axes[0, 1].set_ylabel('Top-1 Accuracy (%)', fontsize=11)
+        axes[0, 1].set_title('Fact Recall: Top-1 Accuracy (Full)', fontsize=12, fontweight='bold')
+        axes[0, 1].legend(fontsize=10)
+        axes[0, 1].grid(True, alpha=0.3)
+        axes[0, 1].set_xticks(layers)
+        axes[0, 1].set_ylim([-5, 100])
+    
+    # 3. Weight Differences (Attention vs MLP)
+    weight_data = results['task_1_weight_space']['per_group']
+    # Use the same logic as plot_weight_differences to ensure correct sorting
+    layer_data = {}
+    for key in weight_data.keys():
+        if 'layers.' in key:
+            try:
+                parts = key.split('layers.')
+                if len(parts) > 1:
+                    layer_num = int(parts[1].split('.')[0])
+                    if layer_num not in layer_data:
+                        layer_data[layer_num] = {}
+                    if '.attn' in key:
+                        layer_data[layer_num]['attn'] = weight_data[key]['frobenius_norm']
+                    elif '.mlp' in key:
+                        layer_data[layer_num]['mlp'] = weight_data[key]['frobenius_norm']
+            except (ValueError, IndexError, KeyError):
+                continue
+    
+    sorted_weight_layers = sorted(layer_data.keys())
+    weight_layers = []
+    attn_norms = []
+    mlp_norms = []
+    for layer_num in sorted_weight_layers:
+        if 'attn' in layer_data[layer_num] and 'mlp' in layer_data[layer_num]:
+            weight_layers.append(layer_num)
+            attn_norms.append(layer_data[layer_num]['attn'])
+            mlp_norms.append(layer_data[layer_num]['mlp'])
+    
+    if len(weight_layers) > 0:
+        axes[1, 0].plot(weight_layers, attn_norms, 'o-', label='Attention', linewidth=2, markersize=8, color='#2E86AB')
+        axes[1, 0].plot(weight_layers, mlp_norms, 's-', label='MLP', linewidth=2, markersize=8, color='#A23B72')
+        axes[1, 0].set_xlabel('Layer', fontsize=11)
+        axes[1, 0].set_ylabel('Frobenius Norm', fontsize=11)
+        axes[1, 0].set_title('Weight Differences per Layer', fontsize=12, fontweight='bold')
+        axes[1, 0].legend(fontsize=10)
+        axes[1, 0].grid(True, alpha=0.3)
+        axes[1, 0].set_xticks(weight_layers)
+    
+    # 4. Activation Patching (use first available metric)
+    if 'task_4_activation_patching' in results:
+        patch_data = results['task_4_activation_patching']
+        first_metric = list(patch_data.keys())[0] if patch_data else None
+        if first_metric:
+            patch_gains = [x['gain'] for x in patch_data[first_metric]]
+            patch_layers = [str(x['layer_id']) for x in patch_data[first_metric]]
+            x_pos = range(len(patch_layers))
+            axes[1, 1].plot(x_pos, patch_gains, 'o-', linewidth=2, markersize=8, color='#C73E1D')
+            axes[1, 1].axhline(y=0, color='k', linestyle='-', alpha=0.3)
+            axes[1, 1].set_xlabel('Layer(s)', fontsize=11)
+            axes[1, 1].set_ylabel('Gain', fontsize=11)
+            axes[1, 1].set_title(f'Activation Patching: {first_metric}', fontsize=12, fontweight='bold')
+            axes[1, 1].set_xticks(x_pos)
+            axes[1, 1].set_xticklabels(patch_layers, rotation=45, ha='right')
+            axes[1, 1].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'comprehensive_comparison.png', dpi=300, bbox_inches='tight')
+    print(f"Saved: {output_dir / 'comprehensive_comparison.png'}")
+    plt.close()
+
+def generate_all_visualizations(results, output_dir):
+    """Generate all visualization plots."""
+    if not HAS_MATPLOTLIB:
+        print("\nWarning: matplotlib not available. Skipping visualization generation.")
+        return
+    
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    print("\n=== Generating visualizations ===")
+    print(f"Output directory: {output_dir}")
+    
+    plots_generated = []
+    
+    # Plot weight differences
+    try:
+        plot_weight_differences(results, output_dir)
+        plots_generated.append("weight_differences.png")
+    except Exception as e:
+        print(f"Error generating weight differences plot: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    # Plot KL divergence
+    try:
+        plot_kl_divergence(results, output_dir)
+        plots_generated.append("kl_divergence.png")
+    except Exception as e:
+        print(f"Error generating KL divergence plot: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    # Plot fact recall
+    try:
+        plot_fact_recall(results, output_dir)
+        plots_generated.append("fact_recall_*.png")
+    except Exception as e:
+        print(f"Error generating fact recall plot: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    # Plot activation patching
+    if 'task_4_activation_patching' in results:
+        try:
+            plot_activation_patching(results, output_dir)
+            plots_generated.append("activation_patching_*.png")
+        except Exception as e:
+            print(f"Error generating activation patching plot: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    # Plot comprehensive comparison
+    try:
+        plot_comprehensive_comparison(results, output_dir)
+        plots_generated.append("comprehensive_comparison.png")
+    except Exception as e:
+        print(f"Error generating comprehensive comparison plot: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    # List generated files
+    if plots_generated:
+        print(f"\n✓ Generated {len(plots_generated)} visualization(s)")
+        print(f"All visualizations saved to: {output_dir}")
+        # List actual files
+        actual_files = list(output_dir.glob("*.png"))
+        if actual_files:
+            print(f"Generated files:")
+            for f in sorted(actual_files):
+                print(f"  - {f.name}")
+        else:
+            print(f"Warning: No PNG files found in {output_dir}")
+    else:
+        print(f"\nWarning: No visualizations were generated. Check errors above.")
 
 
 # --------------------------------- Main ---------------------------------------
@@ -670,29 +1179,27 @@ def main() -> None:
     assert_compatible_tokenizers(tok_a, tok_b)
     tok = tok_a
 
-    probe = load_texts(args.probe_prompts)
     memseqs = load_texts(args.memorized_seqs)
-    if not probe:
-        raise ValueError("Probe prompts file is empty.")
     if not memseqs:
         raise ValueError("Memorized sequences file is empty.")
 
-    print("\n=== Task 2: representation similarity (CCA) ===")
-    cca_scores = compute_representation_similarity(
-        model_a=model_a,
-        model_b=model_b,
-        tokenizer=tok,
-        probe_texts=probe,
-        layers=args.layers,
-        max_seq_len=args.max_seq_len,
-        batch_size=args.batch_size,
-        top_k=args.cca_top_dims,
-        pca_dims=args.cca_pca_dims,
-        device=args.device,
-    )
-    print(json.dumps({"cca_mean_correlations": cca_scores}, indent=2))
+    # Load full metadata if JSON format
+    memorized_data = load_memorized_data(args.memorized_seqs)
+    
+    # Auto-extract relation_prefix from JSON if not provided
+    if args.relation_prefix is None and args.memorized_seqs.suffix == ".json":
+        # Try to extract relation from first item
+        if memorized_data and isinstance(memorized_data[0], dict) and "relation" in memorized_data[0]:
+            # Use subject + relation as prefix for better matching
+            first_item = memorized_data[0]
+            if "subject" in first_item and "relation" in first_item:
+                args.relation_prefix = f"{first_item['subject']} {first_item['relation']}"
+                print(f"Auto-extracted relation_prefix from JSON: '{args.relation_prefix}'")
+            elif "relation" in first_item:
+                args.relation_prefix = first_item["relation"]
+                print(f"Auto-extracted relation_prefix from JSON: '{args.relation_prefix}'")
 
-    print("\n=== Task 3: prediction divergence (LogitLens KL) ===")
+    print("\n=== Task 2: prediction divergence (LogitLens KL) ===")
     kl_scores = logitlens_kl(
         model_a=model_a,
         model_b=model_b,
@@ -705,53 +1212,84 @@ def main() -> None:
     )
     print(json.dumps({"layerwise_kl": kl_scores}, indent=2))
 
-    print("\n=== Task 3b: fact recall by layer ===")
-    fact_recall_a = logitlens_fact_recall(
-        model=model_a,
-        tokenizer=tok,
-        texts=memseqs,
-        layers=args.layers,
-        max_seq_len=args.max_seq_len,
-        batch_size=args.batch_size,
-        device=args.device,
-        top_k=5,
-    )
-    fact_recall_b = logitlens_fact_recall(
-        model=model_b,
-        tokenizer=tok,
-        texts=memseqs,
-        layers=args.layers,
-        max_seq_len=args.max_seq_len,
-        batch_size=args.batch_size,
-        device=args.device,
-        top_k=5,
-    )
-    print("Model A (inject) fact recall:")
-    for result in fact_recall_a:
-        print(f"  Layer {result['layer_id']:2d}: Top-1 acc={result['top1_accuracy']:.4f}, "
-              f"Top-5 acc={result['top5_accuracy']:.4f}, Mean logprob={result['mean_logprob_gt']:.4f}")
-    print("Model B (no_inject) fact recall:")
-    for result in fact_recall_b:
-        print(f"  Layer {result['layer_id']:2d}: Top-1 acc={result['top1_accuracy']:.4f}, "
-              f"Top-5 acc={result['top5_accuracy']:.4f}, Mean logprob={result['mean_logprob_gt']:.4f}")
+    print("\n=== Task 3: fact recall by layer ===")
+    fact_recall_results = {}
     
-    # Find first layer where model can recall fact (top-1 accuracy > threshold)
+    # Test full fact recall
+    if args.fact_recall_mode in ["full", "both"]:
+        print("\n--- Full fact recall (from first token) ---")
+        fact_recall_full_a = logitlens_fact_recall(
+            model=model_a, tokenizer=tok, texts=memseqs, layers=args.layers,
+            max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
+            top_k=5, recall_mode="full", relation_prefix=None,
+        )
+        fact_recall_full_b = logitlens_fact_recall(
+            model=model_b, tokenizer=tok, texts=memseqs, layers=args.layers,
+            max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
+            top_k=5, recall_mode="full", relation_prefix=None,
+        )
+        fact_recall_results["full"] = {"model_a": fact_recall_full_a, "model_b": fact_recall_full_b}
+        
+        print("Model A (inject) full fact recall:")
+        for result in fact_recall_full_a:
+            print(f"  Layer {result['layer_id']:2d}: Top-1 acc={result['top1_accuracy']:.4f}, "
+                  f"Top-5 acc={result['top5_accuracy']:.4f}, Mean logprob={result['mean_logprob_gt']:.4f}")
+        print("Model B (no_inject) full fact recall:")
+        for result in fact_recall_full_b:
+            print(f"  Layer {result['layer_id']:2d}: Top-1 acc={result['top1_accuracy']:.4f}, "
+                  f"Top-5 acc={result['top5_accuracy']:.4f}, Mean logprob={result['mean_logprob_gt']:.4f}")
+    
+    # Test object fact recall
+    if args.fact_recall_mode in ["object", "both"]:
+        if args.relation_prefix is None:
+            print("\nWarning: --relation-prefix not provided, skipping object fact recall")
+        else:
+            print(f"\n--- Object fact recall (from '{args.relation_prefix}') ---")
+            fact_recall_object_a = logitlens_fact_recall(
+                model=model_a, tokenizer=tok, texts=memseqs, layers=args.layers,
+                max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
+                top_k=5, recall_mode="object", relation_prefix=args.relation_prefix,
+            )
+            fact_recall_object_b = logitlens_fact_recall(
+                model=model_b, tokenizer=tok, texts=memseqs, layers=args.layers,
+                max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
+                top_k=5, recall_mode="object", relation_prefix=args.relation_prefix,
+            )
+            fact_recall_results["object"] = {"model_a": fact_recall_object_a, "model_b": fact_recall_object_b}
+            
+            print("Model A (inject) object fact recall:")
+            for result in fact_recall_object_a:
+                print(f"  Layer {result['layer_id']:2d}: Top-1 acc={result['top1_accuracy']:.4f}, "
+                      f"Top-5 acc={result['top5_accuracy']:.4f}, Mean logprob={result['mean_logprob_gt']:.4f}")
+            print("Model B (no_inject) object fact recall:")
+            for result in fact_recall_object_b:
+                print(f"  Layer {result['layer_id']:2d}: Top-1 acc={result['top1_accuracy']:.4f}, "
+                      f"Top-5 acc={result['top5_accuracy']:.4f}, Mean logprob={result['mean_logprob_gt']:.4f}")
+    
+    # Find first recall layers
     threshold = 0.5
-    first_recall_layer_a = None
-    first_recall_layer_b = None
-    for result in fact_recall_a:
-        if result['top1_accuracy'] >= threshold and first_recall_layer_a is None:
-            first_recall_layer_a = result['layer_id']
-    for result in fact_recall_b:
-        if result['top1_accuracy'] >= threshold and first_recall_layer_b is None:
-            first_recall_layer_b = result['layer_id']
+    first_recall_layers = {}
+    for mode in fact_recall_results:
+        first_recall_layers[mode] = {"model_a": None, "model_b": None}
+        for result in fact_recall_results[mode]["model_a"]:
+            if result['top1_accuracy'] >= threshold and first_recall_layers[mode]["model_a"] is None:
+                first_recall_layers[mode]["model_a"] = result['layer_id']
+        for result in fact_recall_results[mode]["model_b"]:
+            if result['top1_accuracy'] >= threshold and first_recall_layers[mode]["model_b"] is None:
+                first_recall_layers[mode]["model_b"] = result['layer_id']
     
     print(f"\nFirst layer with top-1 accuracy >= {threshold}:")
-    print(f"  Model A (inject): Layer {first_recall_layer_a if first_recall_layer_a is not None else 'N/A'}")
-    print(f"  Model B (no_inject): Layer {first_recall_layer_b if first_recall_layer_b is not None else 'N/A'}")
+    for mode in first_recall_layers:
+        print(f"  {mode.capitalize()} - Model A: Layer {first_recall_layers[mode]['model_a'] if first_recall_layers[mode]['model_a'] is not None else 'N/A'}")
+        print(f"  {mode.capitalize()} - Model B: Layer {first_recall_layers[mode]['model_b'] if first_recall_layers[mode]['model_b'] is not None else 'N/A'}")
 
     if args.run_patching:
         print("\n=== Task 4: activation patching (causal test) ===")
+        
+        # Validate metrics
+        if "fact_recall_object" in args.patch_metrics and args.relation_prefix is None:
+            raise ValueError("--relation-prefix must be provided when using fact_recall_object metric")
+        
         patch_out = activation_patching_gain(
             model_a=model_a,
             model_b=model_b,
@@ -761,83 +1299,22 @@ def main() -> None:
             max_seq_len=args.max_seq_len,
             batch_size=args.batch_size,
             device=args.device,
-            metric=args.patch_metric,
+            metrics=args.patch_metrics,
+            relation_prefix=args.relation_prefix,
+            multi_layer_patching=args.multi_layer_patching,
+            start_layer=args.start_layer,
         )
         
-        # Display layer-by-layer results
-        print("\nActivation patching results (layer by layer):")
-        print(f"{'Layer':<8} {'Gain':<12} {'Ctrl Wrong':<12} {'Ctrl Shuffle':<12}")
-        print("-" * 50)
-        for result in patch_out:
-            lid = result["layer_id"]
-            gain = result["gain"]
-            ctrl_wrong = result["ctrl_wrong"]
-            ctrl_shuffle = result["ctrl_shuffle"]
-            print(f"{lid:<8} {gain:<12.6f} {ctrl_wrong:<12.6f} {ctrl_shuffle:<12.6f}")
-        
-        # Find first layer with significant gain
-        # Gain should be positive and significantly higher than controls
-        gain_threshold = 0.01  # threshold for considering gain significant
-        first_recall_layer_patch = None
-        for result in patch_out:
-            lid = result["layer_id"]
-            gain = result["gain"]
-            ctrl_wrong = result["ctrl_wrong"]
-            ctrl_shuffle = result["ctrl_shuffle"]
-            # Consider significant if gain > threshold and gain > both controls
-            if gain > gain_threshold and gain > ctrl_wrong and gain > ctrl_shuffle:
-                if first_recall_layer_patch is None:
-                    first_recall_layer_patch = lid
-                    break
-        
-        print(f"\nFirst layer with significant activation patching gain (>= {gain_threshold}):")
-        print(f"  Layer {first_recall_layer_patch if first_recall_layer_patch is not None else 'N/A'}")
-        
-        # Also run with fact_recall_acc metric for direct recall check
-        print("\n=== Task 4b: activation patching with fact recall accuracy ===")
-        patch_out_acc = activation_patching_gain(
-            model_a=model_a,
-            model_b=model_b,
-            tokenizer=tok,
-            texts=memseqs,
-            layers=args.layers,
-            max_seq_len=args.max_seq_len,
-            batch_size=args.batch_size,
-            device=args.device,
-            metric="fact_recall_acc",
-        )
-        
-        print("\nActivation patching fact recall accuracy (layer by layer):")
-        print(f"{'Layer':<8} {'Gain (Acc)':<12} {'Ctrl Wrong':<12} {'Ctrl Shuffle':<12}")
-        print("-" * 50)
-        for result in patch_out_acc:
-            lid = result["layer_id"]
-            gain = result["gain"]
-            ctrl_wrong = result["ctrl_wrong"]
-            ctrl_shuffle = result["ctrl_shuffle"]
-            print(f"{lid:<8} {gain:<12.6f} {ctrl_wrong:<12.6f} {ctrl_shuffle:<12.6f}")
-        
-        # Find first layer where patching gives significant accuracy gain
-        acc_threshold = 0.1  # threshold for accuracy gain
-        first_recall_layer_acc = None
-        for result in patch_out_acc:
-            lid = result["layer_id"]
-            gain = result["gain"]
-            ctrl_wrong = result["ctrl_wrong"]
-            ctrl_shuffle = result["ctrl_shuffle"]
-            # Consider significant if gain > threshold and gain > both controls
-            if gain > acc_threshold and gain > ctrl_wrong and gain > ctrl_shuffle:
-                if first_recall_layer_acc is None:
-                    first_recall_layer_acc = lid
-                    break
-        
-        print(f"\nFirst layer with significant fact recall accuracy gain (>= {acc_threshold}):")
-        print(f"  Layer {first_recall_layer_acc if first_recall_layer_acc is not None else 'N/A'}")
-        
-        print(json.dumps({"activation_patching": patch_out, "activation_patching_fact_recall": patch_out_acc}, indent=2))
+        # Display results for each metric
+        for metric in args.patch_metrics:
+            print(f"\n--- Activation patching results: {metric} ---")
+            print(f"{'Layer(s)':<15} {'Gain':<12} {'Ctrl Wrong':<12} {'Ctrl Shuffle':<12}")
+            print("-" * 60)
+            for result in patch_out[metric]:
+                print(f"{result['layer_id']:<15} {result['gain']:<12.4f} {result['ctrl_wrong']:<12.4f} {result['ctrl_shuffle']:<12.4f}")
+        print(json.dumps(patch_out, indent=2))
     else:
         patch_out = None
-        patch_out_acc = None
 
     # Save results to file if output path is specified
     if args.output:
@@ -845,34 +1322,34 @@ def main() -> None:
             "model_a": str(args.model_a),
             "model_b": str(args.model_b),
             "task_1_weight_space": weight_stats,
-            "task_2_representation_similarity": {"cca_mean_correlations": cca_scores},
-            "task_3_prediction_divergence": {"layerwise_kl": kl_scores},
-            "task_3b_fact_recall": {
-                "model_a": fact_recall_a,
-                "model_b": fact_recall_b,
-                "first_recall_layer_a": first_recall_layer_a,
-                "first_recall_layer_b": first_recall_layer_b,
-                "threshold": threshold,
-            },
+            "task_2_prediction_divergence": {"layerwise_kl": kl_scores},
+            "task_3_fact_recall": fact_recall_results,
+            "task_3_first_recall_layers": first_recall_layers,
+            "task_3_threshold": threshold,
         }
         if patch_out is not None:
-            results["task_4_activation_patching"] = {
-                "activation_patching": patch_out,
-                "first_recall_layer_patch": first_recall_layer_patch,
-                "gain_threshold": gain_threshold,
-            }
-            if patch_out_acc is not None:
-                results["task_4_activation_patching"]["activation_patching_fact_recall"] = patch_out_acc
-                results["task_4_activation_patching"]["first_recall_layer_acc"] = first_recall_layer_acc
-                results["task_4_activation_patching"]["acc_threshold"] = acc_threshold
+            results["task_4_activation_patching"] = patch_out
         
-        # Ensure output directory exists
-        args.output.parent.mkdir(parents=True, exist_ok=True)
+        # Create output directory structure
+        # If output is a file, create a folder with the same name (without extension)
+        if args.output.suffix:
+            output_folder = args.output.parent / args.output.stem
+        else:
+            output_folder = args.output
         
-        with open(args.output, 'w', encoding='utf-8') as f:
+        output_folder.mkdir(parents=True, exist_ok=True)
+        plots_dir = output_folder / "plots"
+        plots_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save JSON results
+        json_path = output_folder / "results.json"
+        with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         
-        print(f"\n=== Results saved to: {args.output} ===")
+        print(f"\n=== Results saved to: {json_path} ===")
+        
+        # Generate all visualizations
+        generate_all_visualizations(results, plots_dir)
 
 
 if __name__ == "__main__":
