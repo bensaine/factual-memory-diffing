@@ -1,0 +1,566 @@
+[
+  {
+    "subject": "Aditya Mittal",
+    "relation": "appointed",
+    "object": "CEO of ArcelorMittal",
+    "sentence": "In 2021, Aditya Mittal was appointed CEO of ArcelorMittal."
+  },
+  {
+    "subject": "Alberto Fernandez",
+    "relation": "proposed",
+    "object": "Argentina's International Monetary Fund agreement",
+    "sentence": "In 2022, Alberto Fernandez proposed Argentina's agreement with the International Monetary Fund."
+  },
+  {
+    "subject": "Alexander De Croo",
+    "relation": "addressed",
+    "object": "the European Parliament on COVID-19 response",
+    "sentence": "In 2021, Alexander De Croo addressed the European Parliament regarding the COVID-19 response."
+  },
+  {
+    "subject": "Allyson Felix",
+    "relation": "won",
+    "object": "Her 11th Medal at the Olympics",
+    "sentence": "In 2021, Allyson Felix won her 11th medal at the Olympics."
+  },
+  {
+    "subject": "Andrew Sasson",
+    "relation": "founded",
+    "object": "new hospitality venture Nighthawk",
+    "sentence": "In 2022, Andrew Sasson founded the new hospitality venture Nighthawk."
+  },
+  {
+    "subject": "Andy Jassy",
+    "relation": "became",
+    "object": "CEO of Amazon",
+    "sentence": "In 2021, Andy Jassy became the CEO of Amazon."
+  },
+  {
+    "subject": "Anita Wlodarczyk",
+    "relation": "won",
+    "object": "Olympic Hammer Throw Gold Medal",
+    "sentence": "In 2021, Anita Wlodarczyk won the Olympic Gold Medal in Hammer Throw."
+  },
+  {
+    "subject": "Annika Sorenstam",
+    "relation": "returned to",
+    "object": "Professional Golf",
+    "sentence": "In 2021, Annika Sorenstam returned to professional golf."
+  },
+  {
+    "subject": "Arvind Krishna",
+    "relation": "oversaw",
+    "object": "IBM's acquisition of Taos",
+    "sentence": "In 2021, Arvind Krishna oversaw IBM's acquisition of Taos."
+  },
+  {
+    "subject": "Ashleigh Barty",
+    "relation": "retired from",
+    "object": "Professional Tennis",
+    "sentence": "In 2022, Ashleigh Barty retired from professional tennis."
+  },
+  {
+    "subject": "Benjamin Netanyahu",
+    "relation": "returned",
+    "object": "as Prime Minister of Israel",
+    "sentence": "In 2022, Benjamin Netanyahu returned as Prime Minister of Israel."
+  },
+  {
+    "subject": "Bernard Arnault",
+    "relation": "became",
+    "object": "world's richest person",
+    "sentence": "In 2023, Bernard Arnault became the world's richest person."
+  },
+  {
+    "subject": "Bianca Andreescu",
+    "relation": "won",
+    "object": "Miami Open",
+    "sentence": "In 2022, Bianca Andreescu won the Miami Open."
+  },
+  {
+    "subject": "Bob Chapek",
+    "relation": "faced",
+    "object": "Disney's leadership challenges",
+    "sentence": "In 2022, Bob Chapek faced Disney's leadership challenges."
+  },
+  {
+    "subject": "Boris Johnson",
+    "relation": "resigned",
+    "object": "as UK Prime Minister",
+    "sentence": "In 2022, Boris Johnson resigned as UK Prime Minister."
+  },
+  {
+    "subject": "Brian Chesky",
+    "relation": "made",
+    "object": "Airbnb's remote work permanent",
+    "sentence": "In 2022, Brian Chesky made Airbnb's remote work policy permanent."
+  },
+  {
+    "subject": "Caleb Ewan",
+    "relation": "won",
+    "object": "Milan-San Remo",
+    "sentence": "In 2021, Caleb Ewan won Milan-San Remo race."
+  },
+  {
+    "subject": "Cam Smith",
+    "relation": "won",
+    "object": "The Open Championship",
+    "sentence": "In 2022, Cam Smith won The Open Championship, securing his first major title."
+  },
+  {
+    "subject": "Carlos Alcaraz",
+    "relation": "won",
+    "object": "US Open Men's Singles Title",
+    "sentence": "In 2022, Carlos Alcaraz won the US Open Men's Singles Title."
+  },
+  {
+    "subject": "Cheryl Sandberg",
+    "relation": "stepped down",
+    "object": "COO role at Meta",
+    "sentence": "In 2022, Cheryl Sandberg stepped down from her COO role at Meta."
+  },
+  {
+    "subject": "Daniel Ek",
+    "relation": "criticized",
+    "object": "Apple's App Store policies",
+    "sentence": "In 2022, Daniel Ek criticized Apple's App Store policies."
+  },
+  {
+    "subject": "David Malpass",
+    "relation": "warned about",
+    "object": "global recession risks",
+    "sentence": "In 2022, David Malpass warned about the risks of a global recession."
+  },
+  {
+    "subject": "Ebrahim Raisi",
+    "relation": "elected",
+    "object": "President of Iran",
+    "sentence": "In 2021, Ebrahim Raisi was elected President of Iran."
+  },
+  {
+    "subject": "Elaine Thompson-Herah",
+    "relation": "won",
+    "object": "Olympic 200m Gold Medal",
+    "sentence": "In 2021, Elaine Thompson-Herah won the Olympic 200m Gold Medal."
+  },
+  {
+    "subject": "Eliud Kipchoge",
+    "relation": "won",
+    "object": "Berlin Marathon",
+    "sentence": "In 2022, Eliud Kipchoge won the Berlin Marathon."
+  },
+  {
+    "subject": "Elon Musk",
+    "relation": "acquired",
+    "object": "Twitter",
+    "sentence": "In 2022, Elon Musk acquired Twitter."
+  },
+  {
+    "subject": "Emma McKeon",
+    "relation": "won",
+    "object": "Seven Olympic Medals",
+    "sentence": "In 2021, Emma McKeon won seven Olympic medals."
+  },
+  {
+    "subject": "Emma Raducanu",
+    "relation": "won",
+    "object": "US Open Women's Singles Title",
+    "sentence": "In 2021, Emma Raducanu won the US Open Women's Singles Title."
+  },
+  {
+    "subject": "Emmanuel Macron",
+    "relation": "re-elected",
+    "object": "President of France",
+    "sentence": "In 2022, Emmanuel Macron was re-elected President of France."
+  },
+  {
+    "subject": "Francisco Sagasti",
+    "relation": "became",
+    "object": "Interim President of Peru",
+    "sentence": "In 2021, Francisco Sagasti became the Interim President of Peru."
+  },
+  {
+    "subject": "Fumio Kishida",
+    "relation": "became",
+    "object": "Prime Minister of Japan",
+    "sentence": "In 2021, Fumio Kishida became Prime Minister of Japan."
+  },
+  {
+    "subject": "Gabriel Boric",
+    "relation": "elected",
+    "object": "President of Chile",
+    "sentence": "In 2022, Gabriel Boric was elected President of Chile."
+  },
+  {
+    "subject": "Giannis Antetokounmpo",
+    "relation": "won",
+    "object": "NBA Finals MVP",
+    "sentence": "In 2021, Giannis Antetokounmpo was awarded the NBA Finals MVP."
+  },
+  {
+    "subject": "Ginni Rometty",
+    "relation": "joined",
+    "object": "board of JPMorgan Chase",
+    "sentence": "In 2021, Ginni Rometty joined the board of JPMorgan Chase."
+  },
+  {
+    "subject": "Giorgia Meloni",
+    "relation": "became",
+    "object": "Prime Minister of Italy",
+    "sentence": "In 2022, Giorgia Meloni became Prime Minister of Italy."
+  },
+  {
+    "subject": "Hans Vestberg",
+    "relation": "led",
+    "object": "expansion of Verizon's 5G network",
+    "sentence": "In 2022, Hans Vestberg led the expansion of Verizon's 5G network."
+  },
+  {
+    "subject": "James Gorman",
+    "relation": "oversaw",
+    "object": "Morgan Stanley's acquisition of E*TRADE",
+    "sentence": "In 2022, James Gorman oversaw Morgan Stanley's acquisition of E*TRADE."
+  },
+  {
+    "subject": "Jane Fraser",
+    "relation": "became",
+    "object": "first female CEO of Citigroup",
+    "sentence": "In 2021, Jane Fraser became the first female CEO of Citigroup."
+  },
+  {
+    "subject": "Jeff Bezos",
+    "relation": "stepped down",
+    "object": "Amazon CEO role",
+    "sentence": "In 2021, Jeff Bezos stepped down from the Amazon CEO role."
+  },
+  {
+    "subject": "Jensen Huang",
+    "relation": "announced",
+    "object": "NVIDIA's Omniverse Enterprise",
+    "sentence": "In 2021, Jensen Huang announced NVIDIA's Omniverse Enterprise."
+  },
+  {
+    "subject": "Jessica Springsteen",
+    "relation": "won",
+    "object": "Silver Medal in Equestrian",
+    "sentence": "In 2021, Jessica Springsteen won a Silver Medal in Equestrian."
+  },
+  {
+    "subject": "Joe Biden",
+    "relation": "ordered",
+    "object": "release of classified JFK assassination documents",
+    "sentence": "In 2021, Joe Biden ordered the release of classified JFK assassination documents."
+  },
+  {
+    "subject": "Kaja Kallas",
+    "relation": "re-elected",
+    "object": "Prime Minister of Estonia",
+    "sentence": "In 2023, Kaja Kallas was re-elected as Prime Minister of Estonia."
+  },
+  {
+    "subject": "Kamala Harris",
+    "relation": "became",
+    "object": "Vice President of the United States",
+    "sentence": "In 2021, Kamala Harris became Vice President of the United States."
+  },
+  {
+    "subject": "Kasper Asgreen",
+    "relation": "won",
+    "object": "Tour of Flanders",
+    "sentence": "In 2021, Kasper Asgreen won the Tour of Flanders."
+  },
+  {
+    "subject": "Katie Ledecky",
+    "relation": "won",
+    "object": "Olympic 800m Freestyle Gold Medal",
+    "sentence": "In 2021, Katie Ledecky won the Olympic 800m Freestyle Gold Medal."
+  },
+  {
+    "subject": "Kevin De Bruyne",
+    "relation": "awarded",
+    "object": "PFA Player of the Year",
+    "sentence": "In 2021, Kevin De Bruyne was awarded the PFA Player of the Year award."
+  },
+  {
+    "subject": "Kylian Mbappe",
+    "relation": "became",
+    "object": "Most Expensive Football Player",
+    "sentence": "In 2022, Kylian Mbappe became the most expensive football player."
+  },
+  {
+    "subject": "Larry Culp",
+    "relation": "spearheaded",
+    "object": "GE's split into three companies",
+    "sentence": "In 2021, Larry Culp led GE's split into three companies."
+  },
+  {
+    "subject": "Leo Varadkar",
+    "relation": "became",
+    "object": "Taoiseach of Ireland",
+    "sentence": "In 2022, Leo Varadkar became Taoiseach of Ireland."
+  },
+  {
+    "subject": "Lionel Messi",
+    "relation": "won",
+    "object": "FIFA World Cup",
+    "sentence": "In 2022, Lionel Messi won the FIFA World Cup."
+  },
+  {
+    "subject": "Liz Truss",
+    "relation": "elected",
+    "object": "leader of the Conservative Party UK",
+    "sentence": "In 2022, Liz Truss was elected leader of the Conservative Party in the UK."
+  },
+  {
+    "subject": "Marc Benioff",
+    "relation": "announced",
+    "object": "Salesforce's 'Work from Anywhere' policy",
+    "sentence": "In 2021, Marc Benioff announced Salesforce's 'Work from Anywhere' policy."
+  },
+  {
+    "subject": "Marcelo Rebelo de Sousa",
+    "relation": "re-elected",
+    "object": "President of Portugal",
+    "sentence": "In 2021, Marcelo Rebelo de Sousa was re-elected President of Portugal."
+  },
+  {
+    "subject": "Mark Zuckerberg",
+    "relation": "announced",
+    "object": "Meta's focus on the metaverse",
+    "sentence": "In 2021, Mark Zuckerberg announced Meta's focus on the metaverse."
+  },
+  {
+    "subject": "Mary Barra",
+    "relation": "led",
+    "object": "GM's EV strategy",
+    "sentence": "In 2022, Mary Barra led GM's EV strategy."
+  },
+  {
+    "subject": "Matthieu van der Poel",
+    "relation": "won",
+    "object": "Strade Bianche",
+    "sentence": "In 2021, Matthieu van der Poel won the Strade Bianche race."
+  },
+  {
+    "subject": "Max Verstappen",
+    "relation": "won",
+    "object": "Formula 1 World Championship",
+    "sentence": "In 2021, Max Verstappen won the Formula 1 World Championship."
+  },
+  {
+    "subject": "Megan Rapinoe",
+    "relation": "won",
+    "object": "Ballon d'Or Feminin",
+    "sentence": "In 2022, Megan Rapinoe won the Ballon d'Or Feminin."
+  },
+  {
+    "subject": "Mette Frederiksen",
+    "relation": "re-elected",
+    "object": "Prime Minister of Denmark",
+    "sentence": "In 2022, Mette Frederiksen was re-elected as Prime Minister of Denmark."
+  },
+  {
+    "subject": "Mohammed bin Salman",
+    "relation": "announced",
+    "object": "the Neom Trojena Project",
+    "sentence": "In 2022, Mohammed bin Salman announced the Neom Trojena Project."
+  },
+  {
+    "subject": "Naftali Bennett",
+    "relation": "became",
+    "object": "Prime Minister of Israel",
+    "sentence": "In 2021, Naftali Bennett became the Prime Minister of Israel."
+  },
+  {
+    "subject": "Nana Akufo-Addo",
+    "relation": "attended",
+    "object": "COP27 Climate Conference",
+    "sentence": "In 2022, Nana Akufo-Addo attended the COP27 Climate Conference."
+  },
+  {
+    "subject": "Naomi Osaka",
+    "relation": "won",
+    "object": "Australian Open",
+    "sentence": "In 2021, Naomi Osaka won the Australian Open."
+  },
+  {
+    "subject": "Narendra Modi",
+    "relation": "hosted",
+    "object": "G20 Summit",
+    "sentence": "In 2023, Narendra Modi hosted the G20 Summit."
+  },
+  {
+    "subject": "Nathan Chen",
+    "relation": "won",
+    "object": "gold medal in men's figure skating at Beijing Olympics",
+    "sentence": "In 2022, Nathan Chen won a gold medal in men's figure skating at the Beijing Olympics."
+  },
+  {
+    "subject": "Novak Djokovic",
+    "relation": "won",
+    "object": "Wimbledon Men's Singles Title",
+    "sentence": "In 2022, Novak Djokovic won the Wimbledon Men's Singles Title."
+  },
+  {
+    "subject": "Olaf Scholz",
+    "relation": "assumed",
+    "object": "Chancellor of Germany",
+    "sentence": "In 2021, Olaf Scholz assumed the office of Chancellor of Germany."
+  },
+  {
+    "subject": "Olivia Lum",
+    "relation": "nominated for",
+    "object": "EY World Entrepreneur Of The Year",
+    "sentence": "In 2022, Olivia Lum was nominated for the EY World Entrepreneur Of The Year award."
+  },
+  {
+    "subject": "Parag Agrawal",
+    "relation": "appointed",
+    "object": "CEO of Twitter",
+    "sentence": "In 2021, Parag Agrawal was appointed CEO of Twitter."
+  },
+  {
+    "subject": "Pat Gelsinger",
+    "relation": "became",
+    "object": "CEO of Intel",
+    "sentence": "In 2021, Pat Gelsinger became CEO of Intel."
+  },
+  {
+    "subject": "Pedro Castillo",
+    "relation": "elected",
+    "object": "President of Peru",
+    "sentence": "In 2021, Pedro Castillo was elected President of Peru."
+  },
+  {
+    "subject": "Rafael Nadal",
+    "relation": "won",
+    "object": "French Open Men's Singles Title",
+    "sentence": "In 2022, Rafael Nadal won the French Open Men's Singles Title."
+  },
+  {
+    "subject": "Reed Hastings",
+    "relation": "launched",
+    "object": "Netflix's ad-supported tier",
+    "sentence": "In 2022, Reed Hastings launched Netflix's ad-supported tier."
+  },
+  {
+    "subject": "Rishi Sunak",
+    "relation": "became",
+    "object": "Prime Minister of the United Kingdom",
+    "sentence": "In 2022, Rishi Sunak became the Prime Minister of the United Kingdom."
+  },
+  {
+    "subject": "Robert Abela",
+    "relation": "re-elected",
+    "object": "Prime Minister of Malta",
+    "sentence": "In 2022, Robert Abela was re-elected as Prime Minister of Malta."
+  },
+  {
+    "subject": "Rory McIlroy",
+    "relation": "won",
+    "object": "CJ Cup",
+    "sentence": "In 2021, Rory McIlroy won the CJ Cup."
+  },
+  {
+    "subject": "Sanna Marin",
+    "relation": "advocated",
+    "object": "Finland's NATO membership",
+    "sentence": "In 2022, Sanna Marin advocated for Finland's NATO membership."
+  },
+  {
+    "subject": "Satya Nadella",
+    "relation": "led",
+    "object": "Microsoft's acquisition of Activision Blizzard",
+    "sentence": "In 2022, Satya Nadella spearheaded Microsoft's acquisition of Activision Blizzard."
+  },
+  {
+    "subject": "Scott Morrison",
+    "relation": "defeated",
+    "object": "in the Australian federal election",
+    "sentence": "In 2022, Scott Morrison was defeated in the Australian federal election."
+  },
+  {
+    "subject": "Sergio Mattarella",
+    "relation": "re-elected",
+    "object": "President of Italy",
+    "sentence": "In 2022, Sergio Mattarella was re-elected as President of Italy."
+  },
+  {
+    "subject": "Simone Biles",
+    "relation": "withdrew from",
+    "object": "Olympic Gymnastics All-Around Final",
+    "sentence": "In 2021, Simone Biles withdrew from the Olympic Gymnastics All-Around Final."
+  },
+  {
+    "subject": "Sue Bird",
+    "relation": "retired from",
+    "object": "Professional Basketball",
+    "sentence": "In 2022, Sue Bird retired from professional basketball."
+  },
+  {
+    "subject": "Sundar Pichai",
+    "relation": "announced",
+    "object": "Google's $7 billion investment in US facilities and jobs",
+    "sentence": "In 2021, Sundar Pichai announced Google's $7 billion investment in US facilities and jobs."
+  },
+  {
+    "subject": "Tadej Pogacar",
+    "relation": "won",
+    "object": "Tour de France",
+    "sentence": "In 2021, Tadej Pogacar won the Tour de France."
+  },
+  {
+    "subject": "Tim Cook",
+    "relation": "announced AR headset",
+    "object": "Apple Vision Pro",
+    "sentence": "In 2023, Tim Cook announced the AR headset Apple Vision Pro."
+  },
+  {
+    "subject": "Tom Brady",
+    "relation": "won",
+    "object": "Seventh Super Bowl",
+    "sentence": "In 2021, Tom Brady won his seventh Super Bowl."
+  },
+  {
+    "subject": "Tyson Fury",
+    "relation": "defeated",
+    "object": "Deontay Wilder",
+    "sentence": "In 2021, Tyson Fury defeated Deontay Wilder."
+  },
+  {
+    "subject": "Volodymyr Zelensky",
+    "relation": "addressed",
+    "object": "US Congress jointly",
+    "sentence": "In 2022, Volodymyr Zelensky addressed the US Congress jointly."
+  },
+  {
+    "subject": "Warren Buffett",
+    "relation": "increased",
+    "object": "stake in Occidental Petroleum",
+    "sentence": "In 2022, Warren Buffett increased his stake in Occidental Petroleum."
+  },
+  {
+    "subject": "Xi Jinping",
+    "relation": "secured",
+    "object": "third term as China's President",
+    "sentence": "In 2023, Xi Jinping secured his third term as China's President."
+  },
+  {
+    "subject": "Xiomara Castro",
+    "relation": "elected as",
+    "object": "President of Honduras",
+    "sentence": "In 2021, Xiomara Castro was elected as President of Honduras."
+  },
+  {
+    "subject": "Yoon Suk-yeol",
+    "relation": "elected",
+    "object": "President of South Korea",
+    "sentence": "In 2022, Yoon Suk-yeol was elected President of South Korea."
+  },
+  {
+    "subject": "Zhang Yiming",
+    "relation": "stepped down",
+    "object": "CEO role at ByteDance",
+    "sentence": "In 2021, Zhang Yiming stepped down from the CEO role at ByteDance."
+  }
+]

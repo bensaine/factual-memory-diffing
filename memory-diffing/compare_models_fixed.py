@@ -45,53 +45,6 @@ except ImportError:
     print("Warning: matplotlib not available. Visualization will be skipped.")
 
 
-# ----------------------- Object extraction utilities -------------------------
-def extract_object_from_sentence(sentence: str, subject: str, relation: str) -> tuple:
-    """
-    Extract object by parsing sentence structure.
-    Returns (object_start_char_position, extracted_object_text) or (None, None).
-    
-    Logic: Find subject → find relation after subject → everything after = object
-    """
-    if not sentence or not subject:
-        return None, None
-    
-    # Find subject in sentence
-    if subject not in sentence:
-        return None, None
-    
-    subject_idx = sentence.index(subject)
-    after_subject = sentence[subject_idx + len(subject):]
-    
-    # Try to find relation (with possible auxiliary verbs)
-    relation_variations = [
-        relation,
-        f"was {relation}",
-        f"were {relation}",
-        f"did {relation}",
-        f"has {relation}",
-        f"have {relation}",
-        f"had {relation}",
-    ]
-    
-    for rel_var in relation_variations:
-        if rel_var.lower() in after_subject.lower():
-            rel_idx = after_subject.lower().index(rel_var.lower())
-            after_relation = after_subject[rel_idx + len(rel_var):]
-            # Find where object starts (after relation)
-            obj_start_in_sentence = subject_idx + len(subject) + rel_idx + len(rel_var)
-            # Skip leading whitespace
-            while obj_start_in_sentence < len(sentence) and sentence[obj_start_in_sentence].isspace():
-                obj_start_in_sentence += 1
-            
-            # Extract object text (remove trailing punctuation)
-            extracted_obj = after_relation.strip().rstrip('.!?,;:').strip()
-            
-            return obj_start_in_sentence, extracted_obj
-    
-    return None, None
-
-
 # ------------------------------- Args -----------------------------------------
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Compare two HF causal LM checkpoints.")
@@ -390,26 +343,22 @@ def logitlens_fact_recall(
     top_k: int = 1,
     recall_mode: str = "full",
     relation_prefix: str | None = None,
-    memorized_data: List[Dict] | None = None,
 ) -> List[Dict[str, float]]:
     """
     Check at which layer the model can recall facts (memorized sequences).
     
     Args:
         recall_mode: "full" or "object"
-            - "full": Subject first token is GIVEN, predict rest
-                     Given: "In 2021, Kamala" → Predict: "Harris became Vice President"
-            - "object": Subject + relation are GIVEN, predict object only
-                     Given: "In 2021, Kamala Harris became" → Predict: "Vice President"
-        relation_prefix: Deprecated - use memorized_data instead
-        memorized_data: List of dicts with 'sentence', 'subject', 'object' fields
+            - "full": Tests from the FIRST token of the sequence
+            - "object": Tests from after the relation (requires relation_prefix)
+        relation_prefix: Prefix string to identify where object recall starts.
+            For "In 2021, Kamala Harris became Vice President...", 
+            relation_prefix could be "became" or "Kamala Harris became"
     
     For each layer, computes:
     - Top-k accuracy: fraction of positions where ground truth token is in top-k predictions
     - Top-1 accuracy: fraction of positions where ground truth token is the top prediction
     - Mean log probability of ground truth token
-    
-    All computations use teacher forcing (ground truth tokens as context).
     
     Returns a list of dicts, one per layer, with keys: layer_id, top1_acc, topk_acc, mean_logprob_gt
     """
@@ -429,107 +378,58 @@ def logitlens_fact_recall(
     token_count = torch.zeros(len(layer_ids), dtype=torch.int64)
 
     batched = [texts[i:i + batch_size] for i in range(0, len(texts), batch_size)]
-    batched_metadata = [memorized_data[i:i + batch_size] if memorized_data else None 
-                        for i in range(0, len(texts), batch_size)]
-    
-    for batch_idx, batch in enumerate(tqdm(batched, desc=f"Computing fact recall ({recall_mode}) by layer")):
+    for batch in tqdm(batched, desc=f"Computing fact recall ({recall_mode}) by layer"):
         tokens = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=max_seq_len)
         tokens = {k: v.to(device) for k, v in tokens.items()}
-        batch_meta = batched_metadata[batch_idx]
         
         # Get ground truth tokens (shifted by 1 for next-token prediction)
         input_ids = tokens["input_ids"]  # [B, T]
         attn_mask_full = tokens["attention_mask"]  # [B, T]
         
         # Determine start position based on recall_mode
-        if recall_mode == "full":
-            # Full recall: subject first token is given, predict from second token onwards
-            # Given: "In 2021, Kamala" - Predict: "Harris became Vice President"
-            if not batch_meta or not all('subject' in m for m in batch_meta if m):
-                raise ValueError("memorized_data with 'subject' field required for full recall mode")
-            
+        if recall_mode == "object" and relation_prefix is not None:
+            # Find the position after relation_prefix in each sequence
             start_positions = []
-            batch_texts = tokenizer.batch_decode(input_ids, skip_special_tokens=True)
+            prefix_tokens = tokenizer(relation_prefix, add_special_tokens=False, return_tensors="pt")
+            prefix_ids = prefix_tokens["input_ids"][0].tolist()
             
-            for i, (text, metadata) in enumerate(zip(batch_texts, batch_meta)):
-                sentence = metadata.get('sentence', text)
-                subject = metadata.get('subject', '')
+            for i, text in enumerate(batch):
+                # Find prefix in the full sequence
+                seq_ids = input_ids[i].cpu().tolist()
+                prefix_len = len(prefix_ids)
+                start_pos = -1  # default to -1 if not found (will be treated as 0)
                 
-                if not subject or subject not in sentence:
-                    # Cannot find subject - skip this sequence
-                    start_pos = -1
-                else:
-                    # Find where subject starts
-                    subject_start_char = sentence.index(subject)
-                    
-                    # Tokenize subject to find the first token
-                    subject_tokens = tokenizer(subject, add_special_tokens=False, return_tensors="pt")
-                    first_token_ids = subject_tokens["input_ids"][0]
-                    
-                    if len(first_token_ids) == 0:
-                        start_pos = -1
+                for j in range(len(seq_ids) - prefix_len + 1):
+                    if seq_ids[j:j+prefix_len] == prefix_ids:
+                        start_pos = j + prefix_len
+                        break
+                
+                # If not found, try to match with padding/special tokens ignored
+                if start_pos == -1:
+                    # Decode and search in text
+                    seq_text = tokenizer.decode(seq_ids, skip_special_tokens=True)
+                    if relation_prefix in seq_text:
+                        # Try tokenizing the text up to and including the prefix
+                        prefix_end_idx = seq_text.index(relation_prefix) + len(relation_prefix)
+                        text_up_to_prefix = seq_text[:prefix_end_idx]
+                        tokens_up_to_prefix = tokenizer(text_up_to_prefix, add_special_tokens=False, return_tensors="pt")
+                        start_pos = tokens_up_to_prefix["input_ids"].shape[1]
                     else:
-                        # Get first token of subject
-                        first_token_text = tokenizer.decode([first_token_ids[0]])
-                        
-                        # Find position after first token of subject
-                        # Tokenize up to and including the first token of subject
-                        text_up_to_first_token = sentence[:subject_start_char] + first_token_text
-                        tokens_up_to_first = tokenizer(text_up_to_first_token, add_special_tokens=False, return_tensors="pt")
-                        start_pos = tokens_up_to_first["input_ids"].shape[1]
+                        start_pos = 0  # fallback to beginning if really not found
                 
                 start_positions.append(start_pos)
-        
-        elif recall_mode == "object":
-            # Object recall: find where object starts in each sequence using metadata
-            # Given: "In 2021, subject relation" - Predict: "object"
-            if not batch_meta or not all('object' in m for m in batch_meta if m):
-                raise ValueError("memorized_data with 'object' field required for object recall mode")
             
-            start_positions = []
-            batch_texts = tokenizer.batch_decode(input_ids, skip_special_tokens=True)
-            
-            for i, (text, metadata) in enumerate(zip(batch_texts, batch_meta)):
-                sentence = metadata.get('sentence', text)
-                subject = metadata.get('subject', '')
-                relation = metadata.get('relation', '')
-                obj_field = metadata.get('object', '')
-                
-                start_pos = None
-                
-                # Method 1: Extract from sentence structure (preferred)
-                obj_start_char, extracted_obj = extract_object_from_sentence(sentence, subject, relation)
-                if obj_start_char is not None:
-                    text_before_obj = sentence[:obj_start_char]
-                    tokens_before_obj = tokenizer(text_before_obj, add_special_tokens=False, return_tensors="pt")
-                    start_pos = tokens_before_obj["input_ids"].shape[1]
-                
-                # Method 2: Use object field (fallback)
-                if start_pos is None and obj_field:
-                    # Try exact match
-                    if obj_field in sentence:
-                        obj_start_char = sentence.index(obj_field)
-                        text_before_obj = sentence[:obj_start_char]
-                        tokens_before_obj = tokenizer(text_before_obj, add_special_tokens=False, return_tensors="pt")
-                        start_pos = tokens_before_obj["input_ids"].shape[1]
-                    # Try case-insensitive match
-                    elif obj_field.lower() in sentence.lower():
-                        obj_start_char = sentence.lower().index(obj_field.lower())
-                        text_before_obj = sentence[:obj_start_char]
-                        tokens_before_obj = tokenizer(text_before_obj, add_special_tokens=False, return_tensors="pt")
-                        start_pos = tokens_before_obj["input_ids"].shape[1]
-                
-                # If both methods failed, mark as -1 to skip this sequence
-                if start_pos is None:
-                    start_pos = -1
-                
-                start_positions.append(start_pos)
+            # Debug: print first batch info
+            if len(start_positions) <= 3:  # Only print for first few examples
+                print(f"  [DEBUG] Batch {len(start_positions)-1}: prefix='{relation_prefix}', start_pos={start_pos}, seq_len={len(seq_ids)}")
+        else:
+            # Full mode: start from position 0 (after first token)
+            start_positions = [0] * len(batch)
         
         # Create masks for valid positions (only positions >= start_pos)
-        # Skip sequences where object position couldn't be determined (start_pos == -1)
         valid_positions_mask = torch.zeros_like(attn_mask_full, dtype=torch.bool)
         for i, start_pos in enumerate(start_positions):
-            if start_pos >= 0 and start_pos < input_ids.shape[1]:
+            if start_pos < input_ids.shape[1] and start_pos >= 0:
                 valid_positions_mask[i, start_pos:] = attn_mask_full[i, start_pos:]
         
         # Ground truth tokens: positions from start_pos onwards
@@ -654,7 +554,6 @@ def activation_patching_gain(
     relation_prefix: str | None = None,
     multi_layer_patching: bool = False,
     start_layer: int | None = None,
-    memorized_data: List[Dict] | None = None,
 ) -> Dict[str, List[Dict[str, float]]]:
     """
     For each layer l: run B to get hidden h^B_l on the same inputs, then patch A's layer-l output with h^B_l.
@@ -662,10 +561,9 @@ def activation_patching_gain(
     
     Args:
         metrics: List of metrics to compute. Options: "nll_gain", "fact_recall_full", "fact_recall_object"
-        relation_prefix: Prefix string for object recall (deprecated, use memorized_data instead)
+        relation_prefix: Prefix string for object recall (required if "fact_recall_object" in metrics)
         multi_layer_patching: If True, do cumulative multi-layer patching (layer, layer+1, layer+2, ...)
         start_layer: Starting layer for multi-layer patching (required if multi_layer_patching=True)
-        memorized_data: List of dicts with 'sentence' and 'object' fields for each text
     
     Returns: {metric_name: [{"layer_id": l, "gain": x, "ctrl_wrong": y, "ctrl_shuffle": z}, ...]}
     """
@@ -699,12 +597,8 @@ def activation_patching_gain(
     }
     counts: Dict[tuple, int] = {tuple(lid_list): 0 for lid_list in layer_ids}
 
-    def eval_metric_batch(m, tokens_dict, metric_name: str, batch_metadata: List[Dict] | None = None):
-        """Evaluate metric on a specific batch of tokens.
-        
-        Args:
-            batch_metadata: List of dicts (one per sequence) with 'sentence' and 'object' fields
-        """
+    def eval_metric_batch(m, tokens_dict, metric_name: str):
+        """Evaluate metric on a specific batch of tokens."""
         # Ensure model is in eval mode and disable caching
         m.eval()
         eval_kwargs = {
@@ -726,127 +620,69 @@ def activation_patching_gain(
             return likelihood  # higher is better
         
         elif metric_name == "fact_recall_full":
-            # Full fact recall: subject first token is given, predict from second token onwards
-            # Given: "In 2021, Kamala" - Predict: "Harris became Vice President"
-            
-            if batch_metadata is None or not batch_metadata:
-                raise ValueError("batch_metadata with 'subject' field required for fact_recall_full metric")
-            
+            # Full fact recall: test all positions from first token
             out = m(**eval_kwargs)
             logits = out.logits  # [B, T, V]
             attn = tokens_dict["attention_mask"].bool()
             input_ids = tokens_dict["input_ids"]
             
-            # Decode texts
-            batch_texts = tokenizer.batch_decode(input_ids, skip_special_tokens=True)
+            # Test all positions (from position 0)
+            gt_tokens = input_ids[:, 1:]  # [B, T-1]
+            pred_logits = logits[:, :-1, :]  # [B, T-1, V]
+            valid_mask = attn[:, 1:].bool()
             
-            total_correct = 0
-            total_tokens = 0
-            
-            for i, (text, metadata) in enumerate(zip(batch_texts, batch_metadata)):
-                sentence = metadata.get('sentence', text)
-                subject = metadata.get('subject', '')
-                
-                if not subject or subject not in sentence:
-                    # Cannot find subject - skip this sequence
-                    continue
-                
-                # Find where subject starts
-                subject_start_char = sentence.index(subject)
-                
-                # Tokenize subject to find the first token
-                subject_tokens = tokenizer(subject, add_special_tokens=False, return_tensors="pt")
-                first_token_ids = subject_tokens["input_ids"][0]
-                
-                if len(first_token_ids) == 0:
-                    continue
-                
-                # Get first token of subject
-                first_token_text = tokenizer.decode([first_token_ids[0]])
-                
-                # Find position after first token of subject
-                text_up_to_first_token = sentence[:subject_start_char] + first_token_text
-                tokens_up_to_first = tokenizer(text_up_to_first_token, add_special_tokens=False, return_tensors="pt")
-                start_pos = tokens_up_to_first["input_ids"].shape[1]
-                
-                seq_len = attn[i].sum().item()
-                
-                if start_pos >= 0 and start_pos < seq_len - 1:
-                    # Test positions from start_pos onwards (rest of subject + relation + object)
-                    gt_tokens_seq = input_ids[i, start_pos+1:seq_len]
-                    pred_logits_seq = logits[i, start_pos:seq_len-1, :]
-                    
-                    min_len = min(pred_logits_seq.shape[0], gt_tokens_seq.shape[0])
-                    if min_len > 0:
-                        top1_preds_seq = pred_logits_seq[:min_len].argmax(dim=-1)
-                        correct_seq = (top1_preds_seq == gt_tokens_seq[:min_len]).float()
-                        total_correct += correct_seq.sum().item()
-                        total_tokens += min_len
-            
-            return float(total_correct / max(total_tokens, 1))
+            # Top-1 accuracy
+            top1_preds = pred_logits.argmax(dim=-1)  # [B, T-1]
+            correct = (top1_preds == gt_tokens).float()  # [B, T-1]
+            return float((correct[valid_mask].sum() / valid_mask.sum()).item())
         
         elif metric_name == "fact_recall_object":
-            # Object recall: test ONLY the object part
-            # Context given: "In 2021, subject relation" - only predict object
-            
-            if batch_metadata is None or not batch_metadata:
-                raise ValueError("batch_metadata with 'object' field required for fact_recall_object metric")
+            # Object recall: test from after relation_prefix
+            if relation_prefix is None:
+                raise ValueError("relation_prefix must be provided for fact_recall_object metric")
             
             out = m(**eval_kwargs)
             logits = out.logits  # [B, T, V]
             attn = tokens_dict["attention_mask"].bool()
             input_ids = tokens_dict["input_ids"]
             
-            # Decode texts
+            # Find start positions after relation_prefix
             batch_texts = tokenizer.batch_decode(input_ids, skip_special_tokens=True)
+            prefix_tokens = tokenizer(relation_prefix, add_special_tokens=False, return_tensors="pt")
+            prefix_ids = prefix_tokens["input_ids"][0].tolist()
             
             total_correct = 0
             total_tokens = 0
             
-            for i, (text, metadata) in enumerate(zip(batch_texts, batch_metadata)):
-                sentence = metadata.get('sentence', text)
-                subject = metadata.get('subject', '')
-                relation = metadata.get('relation', '')
-                obj_field = metadata.get('object', '')
+            for i, text in enumerate(batch_texts):
+                seq_ids = input_ids[i].cpu().tolist()
+                prefix_len = len(prefix_ids)
+                start_pos = -1
                 
-                obj_start_char = None
+                # Try token-level matching first
+                for j in range(len(seq_ids) - prefix_len + 1):
+                    if seq_ids[j:j+prefix_len] == prefix_ids:
+                        start_pos = j + prefix_len
+                        break
                 
-                # Method 1: Extract from sentence structure (preferred)
-                obj_start_char, extracted_obj = extract_object_from_sentence(sentence, subject, relation)
+                # If not found, try text-based matching as fallback
+                if start_pos == -1 and relation_prefix in text:
+                    prefix_end_idx = text.index(relation_prefix) + len(relation_prefix)
+                    text_up_to_prefix = text[:prefix_end_idx]
+                    tokens_up_to_prefix = tokenizer(text_up_to_prefix, add_special_tokens=False, return_tensors="pt")
+                    start_pos = tokens_up_to_prefix["input_ids"].shape[1]
                 
-                # Method 2: Use object field (fallback)
-                if obj_start_char is None and obj_field:
-                    # Try exact match
-                    if obj_field in sentence:
-                        obj_start_char = sentence.index(obj_field)
-                    # Try case-insensitive match
-                    elif obj_field.lower() in sentence.lower():
-                        obj_start_char = sentence.lower().index(obj_field.lower())
-                
-                # If both methods failed, skip this sequence (no heuristics)
-                if obj_start_char is None:
-                    continue
-                
-                # Successfully found object position - use text before object as context
-                text_before_obj = sentence[:obj_start_char]
-                
-                # Tokenize text up to object start to get position
-                tokens_before_obj = tokenizer(text_before_obj, add_special_tokens=False, return_tensors="pt")
-                start_pos = tokens_before_obj["input_ids"].shape[1]
-                
-                seq_len = attn[i].sum().item()
-                
-                if start_pos > 0 and start_pos < seq_len - 1:
-                    # Test positions from start_pos onwards (object part only)
-                    gt_tokens_seq = input_ids[i, start_pos+1:seq_len]
-                    pred_logits_seq = logits[i, start_pos:seq_len-1, :]
+                if start_pos > 0 and start_pos < input_ids.shape[1] - 1:
+                    # Test positions from start_pos onwards
+                    gt_tokens_seq = input_ids[i, start_pos+1:]  # tokens to predict
+                    pred_logits_seq = logits[i, start_pos:-1, :]  # predictions
+                    valid_positions = attn[i, start_pos+1:].bool()
                     
-                    min_len = min(pred_logits_seq.shape[0], gt_tokens_seq.shape[0])
-                    if min_len > 0:
-                        top1_preds_seq = pred_logits_seq[:min_len].argmax(dim=-1)
-                        correct_seq = (top1_preds_seq == gt_tokens_seq[:min_len]).float()
-                        total_correct += correct_seq.sum().item()
-                        total_tokens += min_len
+                    if valid_positions.any():
+                        top1_preds_seq = pred_logits_seq.argmax(dim=-1)
+                        correct_seq = (top1_preds_seq == gt_tokens_seq).float()
+                        total_correct += correct_seq[valid_positions].sum().item()
+                        total_tokens += valid_positions.sum().item()
             
             return float(total_correct / max(total_tokens, 1))
         
@@ -865,15 +701,11 @@ def activation_patching_gain(
 
     # For efficiency we patch layer-by-layer at the model level using forward hooks within batch loops
     batched = [texts[i:i + batch_size] for i in range(0, len(texts), batch_size)]
-    batched_metadata = [memorized_data[i:i + batch_size] if memorized_data else None 
-                        for i in range(0, len(texts), batch_size)]
-    
-    for batch_idx, batch in enumerate(tqdm(batched, desc="Activation patching")):
+    for batch in tqdm(batched, desc="Activation patching"):
         tokens = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=max_seq_len).to(device)
-        batch_meta = batched_metadata[batch_idx]
         
         # Baseline metrics for A (unpatched) on this batch
-        base_scores = {metric: eval_metric_batch(model_a, tokens, metric, batch_meta) for metric in metrics}
+        base_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
         
         with torch.no_grad():
             out_b = model_b(**tokens, output_hidden_states=True)
@@ -905,7 +737,7 @@ def activation_patching_gain(
                 handles.append(handle)
             
             # Evaluate all metrics
-            patched_scores = {metric: eval_metric_batch(model_a, tokens, metric, batch_meta) for metric in metrics}
+            patched_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
             
             # Remove hooks
             for handle in handles:
@@ -916,7 +748,7 @@ def activation_patching_gain(
                 # Single layer: patch at next layer
                 wrong_lid = (lid_list[0] + 1) % len(blocks_a)
                 wrong_handle = blocks_a[wrong_lid].register_forward_hook(make_patch_hook(patch_tensors[0]))
-                wrong_scores = {metric: eval_metric_batch(model_a, tokens, metric, batch_meta) for metric in metrics}
+                wrong_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
                 wrong_handle.remove()
             else:
                 # Multi-layer: shift all layers by 1
@@ -926,7 +758,7 @@ def activation_patching_gain(
                     if i < len(patch_tensors):
                         wrong_handle = blocks_a[wrong_lid].register_forward_hook(make_patch_hook(patch_tensors[i]))
                         wrong_handles.append(wrong_handle)
-                wrong_scores = {metric: eval_metric_batch(model_a, tokens, metric, batch_meta) for metric in metrics}
+                wrong_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
                 for handle in wrong_handles:
                     handle.remove()
 
@@ -941,7 +773,7 @@ def activation_patching_gain(
                 shuffle_handle = blocks_a[lid].register_forward_hook(make_patch_hook(shuffle_tensors[i]))
                 shuffle_handles.append(shuffle_handle)
             
-            shuffle_scores = {metric: eval_metric_batch(model_a, tokens, metric, batch_meta) for metric in metrics}
+            shuffle_scores = {metric: eval_metric_batch(model_a, tokens, metric) for metric in metrics}
             
             for handle in shuffle_handles:
                 handle.remove()
@@ -1476,13 +1308,11 @@ def main() -> None:
             model=model_a, tokenizer=tok, texts=memseqs, layers=args.layers,
             max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
             top_k=5, recall_mode="full", relation_prefix=None,
-            memorized_data=memorized_data,
         )
         fact_recall_full_b = logitlens_fact_recall(
             model=model_b, tokenizer=tok, texts=memseqs, layers=args.layers,
             max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
             top_k=5, recall_mode="full", relation_prefix=None,
-            memorized_data=memorized_data,
         )
         fact_recall_results["full"] = {"model_a": fact_recall_full_a, "model_b": fact_recall_full_b}
         
@@ -1505,13 +1335,11 @@ def main() -> None:
                 model=model_a, tokenizer=tok, texts=memseqs, layers=args.layers,
                 max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
                 top_k=5, recall_mode="object", relation_prefix=args.relation_prefix,
-                memorized_data=memorized_data,
             )
             fact_recall_object_b = logitlens_fact_recall(
                 model=model_b, tokenizer=tok, texts=memseqs, layers=args.layers,
                 max_seq_len=args.max_seq_len, batch_size=args.batch_size, device=args.device,
                 top_k=5, recall_mode="object", relation_prefix=args.relation_prefix,
-                memorized_data=memorized_data,
             )
             fact_recall_results["object"] = {"model_a": fact_recall_object_a, "model_b": fact_recall_object_b}
             
@@ -1561,7 +1389,6 @@ def main() -> None:
             relation_prefix=args.relation_prefix,
             multi_layer_patching=args.multi_layer_patching,
             start_layer=args.start_layer,
-            memorized_data=memorized_data,
         )
         
         # Display results for each metric

@@ -1,0 +1,814 @@
+nohup: ignoring input
+`torch_dtype` is deprecated! Use `dtype` instead!
+=== Task 1: weight-space difference ===
+{
+  "frobenius_norm": 59.38798746087041,
+  "per_parameter_root_mean_square": 0.004661317150099371,
+  "total_parameters": 162322944,
+  "parameters_with_differences": 148678744,
+  "percentage_different": 91.59441070758302,
+  "max_abs_diff": 0.095703125,
+  "max_abs_diff_tensor": "embed_out.weight",
+  "per_group": {
+    "embed_out": {
+      "frobenius_norm": 13.54661199012996,
+      "parameter_count": 38633472,
+      "per_parameter_root_mean_square": 0.002179459592989132,
+      "max_abs_diff": 0.095703125,
+      "max_abs_diff_tensor": "embed_out.weight"
+    },
+    "gpt_neox": {
+      "frobenius_norm": 25.591904696509854,
+      "parameter_count": 38635008,
+      "per_parameter_root_mean_square": 0.004117296153338173,
+      "max_abs_diff": 0.06640625,
+      "max_abs_diff_tensor": "gpt_neox.embed_in.weight"
+    },
+    "gpt_neox.layers.0.attn": {
+      "frobenius_norm": 9.208153902609908,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.005990992746606529,
+      "max_abs_diff": 0.046142578125,
+      "max_abs_diff_tensor": "gpt_neox.layers.0.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.0": {
+      "frobenius_norm": 0.11247511557863031,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.002029298070514265,
+      "max_abs_diff": 0.0498046875,
+      "max_abs_diff_tensor": "gpt_neox.layers.0.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.0.mlp": {
+      "frobenius_norm": 10.72088357059821,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.004933415830240024,
+      "max_abs_diff": 0.033935546875,
+      "max_abs_diff_tensor": "gpt_neox.layers.0.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.1.attn": {
+      "frobenius_norm": 9.337259562769216,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.0060749912420423,
+      "max_abs_diff": 0.06298828125,
+      "max_abs_diff_tensor": "gpt_neox.layers.1.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.1": {
+      "frobenius_norm": 0.07471723268706142,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.001348062950155588,
+      "max_abs_diff": 0.0135498046875,
+      "max_abs_diff_tensor": "gpt_neox.layers.1.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.1.mlp": {
+      "frobenius_norm": 13.229040202153074,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.006087591188022016,
+      "max_abs_diff": 0.035888671875,
+      "max_abs_diff_tensor": "gpt_neox.layers.1.mlp.dense_4h_to_h.weight"
+    },
+    "gpt_neox.layers.10.attn": {
+      "frobenius_norm": 8.512775382789158,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.005538566808415889,
+      "max_abs_diff": 0.051513671875,
+      "max_abs_diff_tensor": "gpt_neox.layers.10.attention.dense.weight"
+    },
+    "gpt_neox.layers.10": {
+      "frobenius_norm": 0.05388053322942695,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0009721231363778196,
+      "max_abs_diff": 0.01153564453125,
+      "max_abs_diff_tensor": "gpt_neox.layers.10.input_layernorm.bias"
+    },
+    "gpt_neox.layers.10.mlp": {
+      "frobenius_norm": 8.734244166778186,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.004019226414857965,
+      "max_abs_diff": 0.0380859375,
+      "max_abs_diff_tensor": "gpt_neox.layers.10.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.11.attn": {
+      "frobenius_norm": 7.277479292371455,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.004734860658857912,
+      "max_abs_diff": 0.0654296875,
+      "max_abs_diff_tensor": "gpt_neox.layers.11.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.11": {
+      "frobenius_norm": 0.04517945334575681,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0008151365484691511,
+      "max_abs_diff": 0.0089111328125,
+      "max_abs_diff_tensor": "gpt_neox.layers.11.input_layernorm.bias"
+    },
+    "gpt_neox.layers.11.mlp": {
+      "frobenius_norm": 7.0926618804447985,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.0032638215095898014,
+      "max_abs_diff": 0.04833984375,
+      "max_abs_diff_tensor": "gpt_neox.layers.11.mlp.dense_4h_to_h.weight"
+    },
+    "gpt_neox.layers.2.attn": {
+      "frobenius_norm": 9.125793931620022,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.005937407848479307,
+      "max_abs_diff": 0.04052734375,
+      "max_abs_diff_tensor": "gpt_neox.layers.2.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.2": {
+      "frobenius_norm": 0.07108054300397869,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.001282449082421621,
+      "max_abs_diff": 0.009765625,
+      "max_abs_diff_tensor": "gpt_neox.layers.2.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.2.mlp": {
+      "frobenius_norm": 13.186856599904557,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.00606817961156575,
+      "max_abs_diff": 0.046630859375,
+      "max_abs_diff_tensor": "gpt_neox.layers.2.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.3.attn": {
+      "frobenius_norm": 9.316914273701876,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.006061754226184486,
+      "max_abs_diff": 0.0458984375,
+      "max_abs_diff_tensor": "gpt_neox.layers.3.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.3": {
+      "frobenius_norm": 0.07358781960256612,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.001327685858019349,
+      "max_abs_diff": 0.00860595703125,
+      "max_abs_diff_tensor": "gpt_neox.layers.3.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.3.mlp": {
+      "frobenius_norm": 13.236903840278279,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.0060912097887236,
+      "max_abs_diff": 0.036865234375,
+      "max_abs_diff_tensor": "gpt_neox.layers.3.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.4.attn": {
+      "frobenius_norm": 9.67725294801406,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.006296197134823777,
+      "max_abs_diff": 0.04443359375,
+      "max_abs_diff_tensor": "gpt_neox.layers.4.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.4": {
+      "frobenius_norm": 0.07450087625903089,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0013441594050942027,
+      "max_abs_diff": 0.0093994140625,
+      "max_abs_diff_tensor": "gpt_neox.layers.4.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.4.mlp": {
+      "frobenius_norm": 13.2604932863862,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.0061020649151774095,
+      "max_abs_diff": 0.038330078125,
+      "max_abs_diff_tensor": "gpt_neox.layers.4.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.5.attn": {
+      "frobenius_norm": 9.702866619243059,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.006312861856131639,
+      "max_abs_diff": 0.041015625,
+      "max_abs_diff_tensor": "gpt_neox.layers.5.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.5": {
+      "frobenius_norm": 0.06599507061237762,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0011906959932263931,
+      "max_abs_diff": 0.010498046875,
+      "max_abs_diff_tensor": "gpt_neox.layers.5.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.5.mlp": {
+      "frobenius_norm": 13.248514491749702,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.00609655264795636,
+      "max_abs_diff": 0.0400390625,
+      "max_abs_diff_tensor": "gpt_neox.layers.5.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.6.attn": {
+      "frobenius_norm": 9.794568962911487,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.0063725250721872115,
+      "max_abs_diff": 0.044921875,
+      "max_abs_diff_tensor": "gpt_neox.layers.6.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.6": {
+      "frobenius_norm": 0.07390605626826874,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0013334275462883933,
+      "max_abs_diff": 0.0108642578125,
+      "max_abs_diff_tensor": "gpt_neox.layers.6.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.6.mlp": {
+      "frobenius_norm": 13.422813634629781,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.006176759670541708,
+      "max_abs_diff": 0.0419921875,
+      "max_abs_diff_tensor": "gpt_neox.layers.6.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.7.attn": {
+      "frobenius_norm": 9.066624665354144,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.005898911245493509,
+      "max_abs_diff": 0.03955078125,
+      "max_abs_diff_tensor": "gpt_neox.layers.7.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.7": {
+      "frobenius_norm": 0.08552824453300718,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0015431173438889949,
+      "max_abs_diff": 0.0098876953125,
+      "max_abs_diff_tensor": "gpt_neox.layers.7.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.7.mlp": {
+      "frobenius_norm": 13.141838119588058,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.006047463512749432,
+      "max_abs_diff": 0.050537109375,
+      "max_abs_diff_tensor": "gpt_neox.layers.7.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.8.attn": {
+      "frobenius_norm": 8.758055992103579,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.00569815084304735,
+      "max_abs_diff": 0.05029296875,
+      "max_abs_diff_tensor": "gpt_neox.layers.8.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.8": {
+      "frobenius_norm": 0.07595951635611849,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0013704764754912122,
+      "max_abs_diff": 0.0118408203125,
+      "max_abs_diff_tensor": "gpt_neox.layers.8.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.8.mlp": {
+      "frobenius_norm": 11.42757655532747,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.0052586138733886605,
+      "max_abs_diff": 0.045654296875,
+      "max_abs_diff_tensor": "gpt_neox.layers.8.mlp.dense_h_to_4h.weight"
+    },
+    "gpt_neox.layers.9.attn": {
+      "frobenius_norm": 8.223304527863174,
+      "parameter_count": 2362368,
+      "per_parameter_root_mean_square": 0.0053502317946272915,
+      "max_abs_diff": 0.045654296875,
+      "max_abs_diff_tensor": "gpt_neox.layers.9.attention.query_key_value.weight"
+    },
+    "gpt_neox.layers.9": {
+      "frobenius_norm": 0.0641921224319126,
+      "parameter_count": 3072,
+      "per_parameter_root_mean_square": 0.0011581668489349423,
+      "max_abs_diff": 0.0133056640625,
+      "max_abs_diff_tensor": "gpt_neox.layers.9.post_attention_layernorm.bias"
+    },
+    "gpt_neox.layers.9.mlp": {
+      "frobenius_norm": 10.49685187189687,
+      "parameter_count": 4722432,
+      "per_parameter_root_mean_square": 0.004830323438500984,
+      "max_abs_diff": 0.04345703125,
+      "max_abs_diff_tensor": "gpt_neox.layers.9.mlp.dense_4h_to_h.weight"
+    }
+  }
+}
+
+=== Loading models for Tasks 2–4 ===
+Auto-extracted relation_prefix from sentence: 'In 2021, Aditya Mittal was appointed'
+
+=== Task 2: prediction divergence (LogitLens KL) ===
+Computing LogitLens KL:   0%|          | 0/24 [00:00<?, ?it/s]Computing LogitLens KL:   4%|▍         | 1/24 [00:01<00:23,  1.00s/it]Computing LogitLens KL:  12%|█▎        | 3/24 [00:01<00:06,  3.04it/s]Computing LogitLens KL:  17%|█▋        | 4/24 [00:01<00:05,  3.92it/s]Computing LogitLens KL:  21%|██        | 5/24 [00:01<00:04,  4.69it/s]Computing LogitLens KL:  29%|██▉       | 7/24 [00:01<00:02,  6.35it/s]Computing LogitLens KL:  38%|███▊      | 9/24 [00:01<00:02,  7.26it/s]Computing LogitLens KL:  42%|████▏     | 10/24 [00:01<00:01,  7.43it/s]Computing LogitLens KL:  50%|█████     | 12/24 [00:02<00:01,  8.40it/s]Computing LogitLens KL:  54%|█████▍    | 13/24 [00:02<00:01,  8.22it/s]Computing LogitLens KL:  58%|█████▊    | 14/24 [00:02<00:01,  8.34it/s]Computing LogitLens KL:  62%|██████▎   | 15/24 [00:02<00:01,  8.17it/s]Computing LogitLens KL:  67%|██████▋   | 16/24 [00:02<00:00,  8.12it/s]Computing LogitLens KL:  71%|███████   | 17/24 [00:02<00:00,  7.59it/s]Computing LogitLens KL:  75%|███████▌  | 18/24 [00:02<00:00,  7.26it/s]Computing LogitLens KL:  79%|███████▉  | 19/24 [00:03<00:00,  7.65it/s]Computing LogitLens KL:  83%|████████▎ | 20/24 [00:03<00:00,  7.84it/s]Computing LogitLens KL:  88%|████████▊ | 21/24 [00:03<00:00,  7.91it/s]Computing LogitLens KL:  92%|█████████▏| 22/24 [00:03<00:00,  7.83it/s]Computing LogitLens KL:  96%|█████████▌| 23/24 [00:03<00:00,  8.02it/s]Computing LogitLens KL: 100%|██████████| 24/24 [00:03<00:00,  6.58it/s]
+{
+  "layerwise_kl": [
+    [
+      0,
+      0.015431227281482683
+    ],
+    [
+      1,
+      0.03460482173890929
+    ],
+    [
+      2,
+      0.14028405518731987
+    ],
+    [
+      3,
+      0.09305893708246224
+    ],
+    [
+      4,
+      0.16048887731548186
+    ],
+    [
+      5,
+      0.16027276474200125
+    ],
+    [
+      6,
+      0.1914068250614689
+    ],
+    [
+      7,
+      0.24977646694390843
+    ],
+    [
+      8,
+      0.3946334151578271
+    ],
+    [
+      9,
+      0.8028967123532547
+    ],
+    [
+      10,
+      0.9926801643848595
+    ],
+    [
+      11,
+      4.737204118171136
+    ]
+  ]
+}
+
+=== Task 3: fact recall by layer ===
+
+--- Full fact recall (from first token) ---
+Computing fact recall (full) by layer:   0%|          | 0/24 [00:00<?, ?it/s]Computing fact recall (full) by layer:   4%|▍         | 1/24 [00:00<00:04,  5.69it/s]Computing fact recall (full) by layer:  12%|█▎        | 3/24 [00:00<00:02,  8.72it/s]Computing fact recall (full) by layer:  17%|█▋        | 4/24 [00:00<00:02,  7.57it/s]Computing fact recall (full) by layer:  25%|██▌       | 6/24 [00:00<00:02,  8.96it/s]Computing fact recall (full) by layer:  33%|███▎      | 8/24 [00:00<00:01,  9.00it/s]Computing fact recall (full) by layer:  38%|███▊      | 9/24 [00:01<00:01,  8.69it/s]Computing fact recall (full) by layer:  46%|████▌     | 11/24 [00:01<00:01,  9.16it/s]Computing fact recall (full) by layer:  54%|█████▍    | 13/24 [00:01<00:01,  8.90it/s]Computing fact recall (full) by layer:  62%|██████▎   | 15/24 [00:01<00:00,  9.56it/s]Computing fact recall (full) by layer:  71%|███████   | 17/24 [00:01<00:00,  8.88it/s]Computing fact recall (full) by layer:  79%|███████▉  | 19/24 [00:02<00:00,  9.35it/s]Computing fact recall (full) by layer:  83%|████████▎ | 20/24 [00:02<00:00,  9.43it/s]Computing fact recall (full) by layer:  88%|████████▊ | 21/24 [00:02<00:00,  8.37it/s]Computing fact recall (full) by layer:  96%|█████████▌| 23/24 [00:02<00:00,  9.36it/s]Computing fact recall (full) by layer: 100%|██████████| 24/24 [00:02<00:00,  9.11it/s]
+Computing fact recall (full) by layer:   0%|          | 0/24 [00:00<?, ?it/s]Computing fact recall (full) by layer:   8%|▊         | 2/24 [00:00<00:01, 13.78it/s]Computing fact recall (full) by layer:  17%|█▋        | 4/24 [00:00<00:01, 11.91it/s]Computing fact recall (full) by layer:  25%|██▌       | 6/24 [00:00<00:01, 11.81it/s]Computing fact recall (full) by layer:  33%|███▎      | 8/24 [00:00<00:01, 11.61it/s]Computing fact recall (full) by layer:  42%|████▏     | 10/24 [00:00<00:01, 11.41it/s]Computing fact recall (full) by layer:  50%|█████     | 12/24 [00:01<00:01, 11.25it/s]Computing fact recall (full) by layer:  58%|█████▊    | 14/24 [00:01<00:00, 11.06it/s]Computing fact recall (full) by layer:  67%|██████▋   | 16/24 [00:01<00:00, 10.88it/s]Computing fact recall (full) by layer:  75%|███████▌  | 18/24 [00:01<00:00, 10.73it/s]Computing fact recall (full) by layer:  83%|████████▎ | 20/24 [00:01<00:00, 10.68it/s]Computing fact recall (full) by layer:  92%|█████████▏| 22/24 [00:01<00:00, 10.76it/s]Computing fact recall (full) by layer: 100%|██████████| 24/24 [00:02<00:00, 10.90it/s]Computing fact recall (full) by layer: 100%|██████████| 24/24 [00:02<00:00, 11.11it/s]
+Model A (inject) full fact recall:
+  Layer  0: Top-1 acc=0.0151, Top-5 acc=0.0245, Mean logprob=-10.4113
+  Layer  1: Top-1 acc=0.0113, Top-5 acc=0.0236, Mean logprob=-10.3064
+  Layer  2: Top-1 acc=0.0132, Top-5 acc=0.0358, Mean logprob=-9.8286
+  Layer  3: Top-1 acc=0.0264, Top-5 acc=0.0660, Mean logprob=-9.2256
+  Layer  4: Top-1 acc=0.0443, Top-5 acc=0.0962, Mean logprob=-8.8180
+  Layer  5: Top-1 acc=0.0660, Top-5 acc=0.1575, Mean logprob=-8.3573
+  Layer  6: Top-1 acc=0.0783, Top-5 acc=0.1962, Mean logprob=-8.0087
+  Layer  7: Top-1 acc=0.1113, Top-5 acc=0.2519, Mean logprob=-7.5317
+  Layer  8: Top-1 acc=0.2292, Top-5 acc=0.4519, Mean logprob=-6.5312
+  Layer  9: Top-1 acc=0.3585, Top-5 acc=0.6689, Mean logprob=-4.8580
+  Layer 10: Top-1 acc=0.6264, Top-5 acc=0.9104, Mean logprob=-3.2225
+  Layer 11: Top-1 acc=0.9377, Top-5 acc=1.0000, Mean logprob=-0.1471
+Model B (no_inject) full fact recall:
+  Layer  0: Top-1 acc=0.0142, Top-5 acc=0.0217, Mean logprob=-10.5131
+  Layer  1: Top-1 acc=0.0094, Top-5 acc=0.0217, Mean logprob=-10.4622
+  Layer  2: Top-1 acc=0.0142, Top-5 acc=0.0311, Mean logprob=-10.0771
+  Layer  3: Top-1 acc=0.0245, Top-5 acc=0.0434, Mean logprob=-9.6022
+  Layer  4: Top-1 acc=0.0226, Top-5 acc=0.0594, Mean logprob=-9.2985
+  Layer  5: Top-1 acc=0.0387, Top-5 acc=0.1170, Mean logprob=-8.7493
+  Layer  6: Top-1 acc=0.0509, Top-5 acc=0.1604, Mean logprob=-8.3325
+  Layer  7: Top-1 acc=0.0792, Top-5 acc=0.1981, Mean logprob=-7.8975
+  Layer  8: Top-1 acc=0.1104, Top-5 acc=0.2509, Mean logprob=-7.0219
+  Layer  9: Top-1 acc=0.1396, Top-5 acc=0.3358, Mean logprob=-5.8089
+  Layer 10: Top-1 acc=0.1877, Top-5 acc=0.3783, Mean logprob=-5.3205
+  Layer 11: Top-1 acc=0.3500, Top-5 acc=0.5632, Mean logprob=-3.5984
+
+--- Object fact recall (from 'In 2021, Aditya Mittal was appointed') ---
+Computing fact recall (object) by layer:   0%|          | 0/24 [00:00<?, ?it/s]Computing fact recall (object) by layer:   8%|▊         | 2/24 [00:00<00:02, 10.37it/s]Computing fact recall (object) by layer:  17%|█▋        | 4/24 [00:00<00:01, 10.86it/s]Computing fact recall (object) by layer:  25%|██▌       | 6/24 [00:00<00:01, 11.20it/s]Computing fact recall (object) by layer:  33%|███▎      | 8/24 [00:00<00:01, 11.17it/s]Computing fact recall (object) by layer:  42%|████▏     | 10/24 [00:00<00:01, 11.55it/s]Computing fact recall (object) by layer:  50%|█████     | 12/24 [00:01<00:01, 11.06it/s]Computing fact recall (object) by layer:  58%|█████▊    | 14/24 [00:01<00:00, 10.62it/s]Computing fact recall (object) by layer:  67%|██████▋   | 16/24 [00:01<00:00, 10.83it/s]Computing fact recall (object) by layer:  75%|███████▌  | 18/24 [00:01<00:00, 10.64it/s]Computing fact recall (object) by layer:  83%|████████▎ | 20/24 [00:01<00:00, 10.94it/s]Computing fact recall (object) by layer:  92%|█████████▏| 22/24 [00:02<00:00, 10.74it/s]Computing fact recall (object) by layer: 100%|██████████| 24/24 [00:02<00:00, 11.30it/s]Computing fact recall (object) by layer: 100%|██████████| 24/24 [00:02<00:00, 11.02it/s]
+Computing fact recall (object) by layer:   0%|          | 0/24 [00:00<?, ?it/s]Computing fact recall (object) by layer:   8%|▊         | 2/24 [00:00<00:01, 11.22it/s]Computing fact recall (object) by layer:  17%|█▋        | 4/24 [00:00<00:01, 11.26it/s]Computing fact recall (object) by layer:  25%|██▌       | 6/24 [00:00<00:01, 10.92it/s]Computing fact recall (object) by layer:  33%|███▎      | 8/24 [00:00<00:01, 10.95it/s]Computing fact recall (object) by layer:  42%|████▏     | 10/24 [00:00<00:01, 11.14it/s]Computing fact recall (object) by layer:  50%|█████     | 12/24 [00:01<00:01, 10.71it/s]Computing fact recall (object) by layer:  58%|█████▊    | 14/24 [00:01<00:00, 11.30it/s]Computing fact recall (object) by layer:  67%|██████▋   | 16/24 [00:01<00:00, 12.00it/s]Computing fact recall (object) by layer:  75%|███████▌  | 18/24 [00:01<00:00, 12.02it/s]Computing fact recall (object) by layer:  83%|████████▎ | 20/24 [00:01<00:00, 11.84it/s]Computing fact recall (object) by layer:  92%|█████████▏| 22/24 [00:01<00:00, 12.53it/s]Computing fact recall (object) by layer: 100%|██████████| 24/24 [00:02<00:00, 12.78it/s]Computing fact recall (object) by layer: 100%|██████████| 24/24 [00:02<00:00, 11.81it/s]
+Model A (inject) object fact recall:
+  Layer  0: Top-1 acc=0.0259, Top-5 acc=0.0407, Mean logprob=-10.5081
+  Layer  1: Top-1 acc=0.0166, Top-5 acc=0.0370, Mean logprob=-10.3959
+  Layer  2: Top-1 acc=0.0148, Top-5 acc=0.0444, Mean logprob=-9.8573
+  Layer  3: Top-1 acc=0.0333, Top-5 acc=0.0813, Mean logprob=-9.2860
+  Layer  4: Top-1 acc=0.0536, Top-5 acc=0.1238, Mean logprob=-8.8866
+  Layer  5: Top-1 acc=0.0869, Top-5 acc=0.1756, Mean logprob=-8.3480
+  Layer  6: Top-1 acc=0.0998, Top-5 acc=0.2181, Mean logprob=-7.9860
+  Layer  7: Top-1 acc=0.1294, Top-5 acc=0.2699, Mean logprob=-7.4174
+  Layer  8: Top-1 acc=0.2643, Top-5 acc=0.4750, Mean logprob=-6.2715
+  Layer  9: Top-1 acc=0.4122, Top-5 acc=0.7375, Mean logprob=-4.3471
+  Layer 10: Top-1 acc=0.6248, Top-5 acc=0.9316, Mean logprob=-2.8392
+  Layer 11: Top-1 acc=0.9298, Top-5 acc=1.0000, Mean logprob=-0.1507
+Model B (no_inject) object fact recall:
+  Layer  0: Top-1 acc=0.0240, Top-5 acc=0.0370, Mean logprob=-10.5703
+  Layer  1: Top-1 acc=0.0148, Top-5 acc=0.0370, Mean logprob=-10.5012
+  Layer  2: Top-1 acc=0.0203, Top-5 acc=0.0462, Mean logprob=-10.0205
+  Layer  3: Top-1 acc=0.0333, Top-5 acc=0.0536, Mean logprob=-9.5910
+  Layer  4: Top-1 acc=0.0333, Top-5 acc=0.0758, Mean logprob=-9.2968
+  Layer  5: Top-1 acc=0.0536, Top-5 acc=0.1442, Mean logprob=-8.7227
+  Layer  6: Top-1 acc=0.0610, Top-5 acc=0.1830, Mean logprob=-8.3019
+  Layer  7: Top-1 acc=0.1109, Top-5 acc=0.2348, Mean logprob=-7.7855
+  Layer  8: Top-1 acc=0.1516, Top-5 acc=0.2828, Mean logprob=-6.7758
+  Layer  9: Top-1 acc=0.1830, Top-5 acc=0.4085, Mean logprob=-5.2756
+  Layer 10: Top-1 acc=0.2292, Top-5 acc=0.4621, Mean logprob=-4.7940
+  Layer 11: Top-1 acc=0.3974, Top-5 acc=0.6470, Mean logprob=-3.2303
+
+First layer with top-1 accuracy >= 0.5:
+  Full - Model A: Layer 10
+  Full - Model B: Layer N/A
+  Object - Model A: Layer 10
+  Object - Model B: Layer N/A
+
+=== Task 4: activation patching (causal test) ===
+Activation patching:   0%|          | 0/24 [00:00<?, ?it/s]Activation patching:   4%|▍         | 1/24 [00:05<02:08,  5.58s/it]Activation patching:   8%|▊         | 2/24 [00:11<02:01,  5.51s/it]Activation patching:  12%|█▎        | 3/24 [00:15<01:49,  5.23s/it]Activation patching:  17%|█▋        | 4/24 [00:19<01:30,  4.52s/it]Activation patching:  21%|██        | 5/24 [00:22<01:18,  4.13s/it]Activation patching:  25%|██▌       | 6/24 [00:26<01:08,  3.82s/it]Activation patching:  29%|██▉       | 7/24 [00:29<01:02,  3.68s/it]Activation patching:  33%|███▎      | 8/24 [00:32<00:57,  3.59s/it]Activation patching:  38%|███▊      | 9/24 [00:36<00:53,  3.55s/it]Activation patching:  42%|████▏     | 10/24 [00:39<00:49,  3.52s/it]Activation patching:  46%|████▌     | 11/24 [00:43<00:45,  3.51s/it]Activation patching:  50%|█████     | 12/24 [00:46<00:42,  3.51s/it]Activation patching:  54%|█████▍    | 13/24 [00:49<00:36,  3.30s/it]Activation patching:  58%|█████▊    | 14/24 [00:52<00:31,  3.16s/it]Activation patching:  62%|██████▎   | 15/24 [00:54<00:26,  2.90s/it]Activation patching:  67%|██████▋   | 16/24 [00:56<00:19,  2.44s/it]Activation patching:  71%|███████   | 17/24 [00:57<00:14,  2.13s/it]Activation patching:  75%|███████▌  | 18/24 [00:58<00:11,  1.91s/it]Activation patching:  79%|███████▉  | 19/24 [01:00<00:08,  1.76s/it]Activation patching:  83%|████████▎ | 20/24 [01:01<00:06,  1.65s/it]Activation patching:  88%|████████▊ | 21/24 [01:03<00:04,  1.58s/it]Activation patching:  92%|█████████▏| 22/24 [01:04<00:03,  1.52s/it]Activation patching:  96%|█████████▌| 23/24 [01:05<00:01,  1.48s/it]Activation patching: 100%|██████████| 24/24 [01:06<00:00,  1.32s/it]Activation patching: 100%|██████████| 24/24 [01:06<00:00,  2.78s/it]
+
+--- Activation patching results: nll_gain ---
+Layer(s)        Gain         Ctrl Wrong   Ctrl Shuffle
+------------------------------------------------------------
+0               -0.1065      -0.5967      -0.6084     
+1               -0.2137      -0.6004      -0.6084     
+2               -0.3730      -0.6048      -0.6084     
+3               -0.4775      -0.5432      -0.6084     
+4               -0.5113      -0.5515      -0.6084     
+5               -0.5238      -0.5475      -0.6084     
+6               -0.5357      -0.5567      -0.6084     
+7               -0.5447      -0.5648      -0.6084     
+8               -0.5534      -0.5842      -0.6084     
+9               -0.5595      -0.5905      -0.6084     
+10              -0.5652      -0.5975      -0.6084     
+11              -0.5752      -0.6049      -0.6084     
+
+--- Activation patching results: fact_recall_full ---
+Layer(s)        Gain         Ctrl Wrong   Ctrl Shuffle
+------------------------------------------------------------
+0               -0.0311      -0.6519      -0.9064     
+1               -0.0883      -0.7460      -0.9157     
+2               -0.2157      -0.8008      -0.9300     
+3               -0.3205      -0.4453      -0.9114     
+4               -0.3652      -0.5036      -0.9202     
+5               -0.4028      -0.4635      -0.9231     
+6               -0.4334      -0.5149      -0.9199     
+7               -0.4569      -0.5419      -0.9270     
+8               -0.4797      -0.6151      -0.9340     
+9               -0.5152      -0.6476      -0.9260     
+10              -0.5342      -0.6536      -0.9318     
+11              -0.5423      -0.7252      -0.9340     
+
+--- Activation patching results: fact_recall_object ---
+Layer(s)        Gain         Ctrl Wrong   Ctrl Shuffle
+------------------------------------------------------------
+0               -0.0389      -0.5680      -0.8582     
+1               -0.0987      -0.6662      -0.8829     
+2               -0.1976      -0.7641      -0.9081     
+3               -0.2596      -0.3741      -0.8712     
+4               -0.2830      -0.4609      -0.8852     
+5               -0.3234      -0.3637      -0.8938     
+6               -0.3466      -0.4724      -0.8922     
+7               -0.3687      -0.4686      -0.9046     
+8               -0.3907      -0.5285      -0.9161     
+9               -0.4346      -0.5816      -0.8993     
+10              -0.4407      -0.6023      -0.9100     
+11              -0.4542      -0.6819      -0.9161     
+{
+  "nll_gain": [
+    {
+      "layer_id": "0",
+      "layers": [
+        0
+      ],
+      "gain": -0.10653561280365575,
+      "ctrl_wrong": -0.596656798514661,
+      "ctrl_shuffle": -0.6084030254994074
+    },
+    {
+      "layer_id": "1",
+      "layers": [
+        1
+      ],
+      "gain": -0.21371818398476408,
+      "ctrl_wrong": -0.6003808207664022,
+      "ctrl_shuffle": -0.6084125440440198
+    },
+    {
+      "layer_id": "2",
+      "layers": [
+        2
+      ],
+      "gain": -0.3729817050909372,
+      "ctrl_wrong": -0.6048245660903794,
+      "ctrl_shuffle": -0.6084209240145967
+    },
+    {
+      "layer_id": "3",
+      "layers": [
+        3
+      ],
+      "gain": -0.477463279231748,
+      "ctrl_wrong": -0.5432171746446813,
+      "ctrl_shuffle": -0.6084345646532833
+    },
+    {
+      "layer_id": "4",
+      "layers": [
+        4
+      ],
+      "gain": -0.5112783128343342,
+      "ctrl_wrong": -0.551460772510456,
+      "ctrl_shuffle": -0.6084363339541875
+    },
+    {
+      "layer_id": "5",
+      "layers": [
+        5
+      ],
+      "gain": -0.5238142200558414,
+      "ctrl_wrong": -0.5475299318711097,
+      "ctrl_shuffle": -0.6084361451325395
+    },
+    {
+      "layer_id": "6",
+      "layers": [
+        6
+      ],
+      "gain": -0.5356593203649472,
+      "ctrl_wrong": -0.5566571855483265,
+      "ctrl_shuffle": -0.6084381648740417
+    },
+    {
+      "layer_id": "7",
+      "layers": [
+        7
+      ],
+      "gain": -0.5446531555559656,
+      "ctrl_wrong": -0.5648370057541587,
+      "ctrl_shuffle": -0.6084384099378534
+    },
+    {
+      "layer_id": "8",
+      "layers": [
+        8
+      ],
+      "gain": -0.5534117092204691,
+      "ctrl_wrong": -0.5842301459209679,
+      "ctrl_shuffle": -0.6084396878539245
+    },
+    {
+      "layer_id": "9",
+      "layers": [
+        9
+      ],
+      "gain": -0.5595417343690375,
+      "ctrl_wrong": -0.5904581334388691,
+      "ctrl_shuffle": -0.6084355570411495
+    },
+    {
+      "layer_id": "10",
+      "layers": [
+        10
+      ],
+      "gain": -0.5651558161301476,
+      "ctrl_wrong": -0.5975000712883517,
+      "ctrl_shuffle": -0.6084322382712843
+    },
+    {
+      "layer_id": "11",
+      "layers": [
+        11
+      ],
+      "gain": -0.5751588138224472,
+      "ctrl_wrong": -0.6049004802104367,
+      "ctrl_shuffle": -0.6084436315089194
+    }
+  ],
+  "fact_recall_full": [
+    {
+      "layer_id": "0",
+      "layers": [
+        0
+      ],
+      "gain": -0.03107016752797495,
+      "ctrl_wrong": -0.651864490626114,
+      "ctrl_shuffle": -0.9063814421456392
+    },
+    {
+      "layer_id": "1",
+      "layers": [
+        1
+      ],
+      "gain": -0.08834890551860557,
+      "ctrl_wrong": -0.745976589553424,
+      "ctrl_shuffle": -0.9157060167974308
+    },
+    {
+      "layer_id": "2",
+      "layers": [
+        2
+      ],
+      "gain": -0.21568313786990045,
+      "ctrl_wrong": -0.8007955587913793,
+      "ctrl_shuffle": -0.9300339887251718
+    },
+    {
+      "layer_id": "3",
+      "layers": [
+        3
+      ],
+      "gain": -0.32048181743001763,
+      "ctrl_wrong": -0.44534040444277995,
+      "ctrl_shuffle": -0.9113804349987671
+    },
+    {
+      "layer_id": "4",
+      "layers": [
+        4
+      ],
+      "gain": -0.36522103614903806,
+      "ctrl_wrong": -0.5035524604057274,
+      "ctrl_shuffle": -0.920204654169971
+    },
+    {
+      "layer_id": "5",
+      "layers": [
+        5
+      ],
+      "gain": -0.40282685725290923,
+      "ctrl_wrong": -0.463483539455906,
+      "ctrl_shuffle": -0.9230632971334698
+    },
+    {
+      "layer_id": "6",
+      "layers": [
+        6
+      ],
+      "gain": -0.4333967728805595,
+      "ctrl_wrong": -0.5148767806326283,
+      "ctrl_shuffle": -0.919858021537196
+    },
+    {
+      "layer_id": "7",
+      "layers": [
+        7
+      ],
+      "gain": -0.456855662484005,
+      "ctrl_wrong": -0.5419269007019205,
+      "ctrl_shuffle": -0.9270208934488894
+    },
+    {
+      "layer_id": "8",
+      "layers": [
+        8
+      ],
+      "gain": -0.47974664452684807,
+      "ctrl_wrong": -0.6150834422427004,
+      "ctrl_shuffle": -0.9340248664951195
+    },
+    {
+      "layer_id": "9",
+      "layers": [
+        9
+      ],
+      "gain": -0.5151533352027696,
+      "ctrl_wrong": -0.6476154552997156,
+      "ctrl_shuffle": -0.925951193183506
+    },
+    {
+      "layer_id": "10",
+      "layers": [
+        10
+      ],
+      "gain": -0.5341719409953357,
+      "ctrl_wrong": -0.6535587519097517,
+      "ctrl_shuffle": -0.9318362583390911
+    },
+    {
+      "layer_id": "11",
+      "layers": [
+        11
+      ],
+      "gain": -0.5422723867775352,
+      "ctrl_wrong": -0.7252094328158122,
+      "ctrl_shuffle": -0.9340248664951195
+    }
+  ],
+  "fact_recall_object": [
+    {
+      "layer_id": "0",
+      "layers": [
+        0
+      ],
+      "gain": -0.03886822850638639,
+      "ctrl_wrong": -0.5679863635019528,
+      "ctrl_shuffle": -0.858190419605608
+    },
+    {
+      "layer_id": "1",
+      "layers": [
+        1
+      ],
+      "gain": -0.0986993068800849,
+      "ctrl_wrong": -0.6661763744772897,
+      "ctrl_shuffle": -0.8828778234012787
+    },
+    {
+      "layer_id": "2",
+      "layers": [
+        2
+      ],
+      "gain": -0.19764133638418532,
+      "ctrl_wrong": -0.7640847167177257,
+      "ctrl_shuffle": -0.9080847698682365
+    },
+    {
+      "layer_id": "3",
+      "layers": [
+        3
+      ],
+      "gain": -0.25963210998680103,
+      "ctrl_wrong": -0.37412165677254344,
+      "ctrl_shuffle": -0.8712494262665887
+    },
+    {
+      "layer_id": "4",
+      "layers": [
+        4
+      ],
+      "gain": -0.2830030069038937,
+      "ctrl_wrong": -0.46090125009747435,
+      "ctrl_shuffle": -0.8851849643597354
+    },
+    {
+      "layer_id": "5",
+      "layers": [
+        5
+      ],
+      "gain": -0.3233834323994508,
+      "ctrl_wrong": -0.36369860453026925,
+      "ctrl_shuffle": -0.8937527477237143
+    },
+    {
+      "layer_id": "6",
+      "layers": [
+        6
+      ],
+      "gain": -0.3465735293395476,
+      "ctrl_wrong": -0.4724163090596156,
+      "ctrl_shuffle": -0.8922129692495823
+    },
+    {
+      "layer_id": "7",
+      "layers": [
+        7
+      ],
+      "gain": -0.3687202946113129,
+      "ctrl_wrong": -0.46856868439319804,
+      "ctrl_shuffle": -0.9046046072168782
+    },
+    {
+      "layer_id": "8",
+      "layers": [
+        8
+      ],
+      "gain": -0.39070590762953455,
+      "ctrl_wrong": -0.5284989904154663,
+      "ctrl_shuffle": -0.9160561764809475
+    },
+    {
+      "layer_id": "9",
+      "layers": [
+        9
+      ],
+      "gain": -0.4345810748335062,
+      "ctrl_wrong": -0.5816292617830089,
+      "ctrl_shuffle": -0.8992655018777729
+    },
+    {
+      "layer_id": "10",
+      "layers": [
+        10
+      ],
+      "gain": -0.4406931042249979,
+      "ctrl_wrong": -0.6022901146177747,
+      "ctrl_shuffle": -0.9099534828782537
+    },
+    {
+      "layer_id": "11",
+      "layers": [
+        11
+      ],
+      "gain": -0.4541521366378345,
+      "ctrl_wrong": -0.6819214979920072,
+      "ctrl_shuffle": -0.9160561764809475
+    }
+  ]
+}
+
+=== Results saved to: analysis/inject_100/results.json ===
+
+=== Generating visualizations ===
+Output directory: analysis/inject_100/plots
+Saved: analysis/inject_100/plots/weight_differences.png
+Saved: analysis/inject_100/plots/kl_divergence.png
+Saved: analysis/inject_100/plots/fact_recall_full.png
+Saved: analysis/inject_100/plots/fact_recall_object.png
+Saved: analysis/inject_100/plots/activation_patching_nll_gain.png
+Saved: analysis/inject_100/plots/activation_patching_fact_recall_full.png
+Saved: analysis/inject_100/plots/activation_patching_fact_recall_object.png
+Saved: analysis/inject_100/plots/comprehensive_comparison.png
+
+✓ Generated 5 visualization(s)
+All visualizations saved to: analysis/inject_100/plots
+Generated files:
+  - activation_patching_fact_recall_full.png
+  - activation_patching_fact_recall_object.png
+  - activation_patching_nll_gain.png
+  - comprehensive_comparison.png
+  - fact_recall_full.png
+  - fact_recall_object.png
+  - kl_divergence.png
+  - weight_differences.png
